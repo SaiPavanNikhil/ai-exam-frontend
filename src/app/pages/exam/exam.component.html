@@ -1,103 +1,107 @@
 <div class="container">
 
-  <!-- HEADER -->
   <div class="header">
-    <h2>AI Online Interview System</h2>
+    <h2>AI Dynamic Interview System</h2>
+    <p *ngIf="candidateName">Candidate: {{ candidateName }}</p>
   </div>
 
-  <!-- 🔥 START INTERVIEW -->
-  <div class="start-section" *ngIf="!interviewId">
-    <button (click)="startInterview()">
-      ▶ Start Interview
-    </button>
-  </div>
+  <div class="pre-check" *ngIf="!interviewId">
 
-  <!-- MAIN CONTENT -->
-  <div class="content" *ngIf="interviewId && !interviewCompleted">
-
-    <!-- LEFT SIDE: VIDEO -->
     <div class="video-section">
-
-      <h3>Live Monitoring</h3>
-
-      <!-- Video Preview -->
+      <h3>Face Verification</h3>
       <video #video autoplay muted></video>
 
-      <!-- Recording Indicator -->
-      <p *ngIf="videoStream && audioStream" style="color: red;">
-        🔴 Audio & Video Recording...
-      </p>
-
-      <!-- Info -->
-      <p style="font-size: 12px; color: gray;">
-        Camera is recording continuously for proctoring.
-      </p>
-
+      <div class="status-box">
+        <p *ngIf="faceStatus === 'checking'">🔍 Calibrating workspace view parameters...</p>
+        <p *ngIf="faceStatus === 'success'" style="color: green;">
+          ✅ Workspace verification complete
+        </p>
+        <p *ngIf="faceStatus === 'error'" style="color: red;">
+          ❌ {{ faceError }}
+        </p>
+      </div>
     </div>
 
-    <!-- RIGHT SIDE: QUESTION -->
-    <div class="question-section">
+    <div class="audio-section">
+      
+      <h3>1. Microphone Status</h3>
+      <div class="audio-meter">
+        <div class="audio-level" [style.width.%]="audioLevel"></div>
+      </div>
+      <p class="hint">🎤 Enounce clearly into your headset to confirm standard transmission levels.</p>
 
-      <h3>Question</h3>
+      <div class="instructions" style="margin-top: 25px;">
+        <h3>2. Session Guidelines</h3>
+        <ul>
+          <li>Keep your face positioned within the live camera viewport framework.</li>
+          <li>Questions are loaded dynamically based on your profile's assigned track.</li>
+          <li>System focus lock is active. Do not alternate windows or drop tabs.</li>
+        </ul>
 
-      <!-- Question Text -->
-      <p *ngIf="currentQuestion; else loading">
-        {{ currentQuestion?.question_text }}
-      </p>
-
-      <!-- 🔊 Replay -->
-      <button 
-        *ngIf="currentQuestion"
-        (click)="speakQuestion(currentQuestion?.question_text)"
-        class="replay-btn">
-        🔊 Replay Question
-      </button>
-
-      <!-- Loading -->
-      <ng-template #loading>
-        <p>⏳ Loading question...</p>
-      </ng-template>
-
-      <!-- Timer -->
-      <h4>⏱ Time Left: {{ formattedTime }}</h4>
-
-      <!-- Warning -->
-      <p *ngIf="timeLeft <= 10" style="color: red;">
-        ⚠ Last 10 seconds!
-      </p>
-
-      <!-- Answer Box -->
-      <textarea 
-        [(ngModel)]="answer"
-        rows="6"
-        placeholder="Your spoken answer will appear here..."
-        readonly>
-      </textarea>
-
-      <!-- Info -->
-      <p style="color: orange; margin-top: 10px;">
-        🎤 Speak clearly. Your audio is being recorded continuously.
-      </p>
-
-      <!-- ACTIONS -->
-      <div class="btn-group" style="margin-top: 15px;">
-
-        <!-- <button (click)="handleNextQuestion()" [disabled]="!currentQuestion">
-          ➡ Next Question
-        </button> -->
-
+        <div class="start-trigger" style="margin-top: 25px;">
+          <div>
+            <p class="start-note" style="border-left: 4px solid #4f46e5; background: #f5f3ff; padding: 15px; border-radius: 6px; margin: 0; color: #4338ca; font-weight: 500;">
+              🔴  If you are ready to proceed, Say 'Ok Lets Go' to initiate the assessment.
+            </p>
+            
+            <button class="btn-start" (click)="startInterview()" style="margin-top: 15px; width: 100%;">
+              Launch Assessment Room
+            </button>
+          </div>
+        </div>
       </div>
 
     </div>
-
   </div>
 
-  <!-- COMPLETION SCREEN -->
+  <div class="content" *ngIf="interviewId && !interviewCompleted">
+
+    <div class="video-section">
+      <h3>Live Monitoring</h3>
+      <video #video autoplay muted></video>
+      <div class="live-indicator">
+        <span class="dot"></span> 🔴 Recording Live Session...
+      </div>
+      
+      <div class="grading-toast" *ngIf="isGradingPrevious">
+        <p>⚙️ Analyzing evaluation matrix & metrics in background...</p>
+      </div>
+    </div>
+
+    <div class="question-section">
+      <div class="q-header">
+        <span class="q-count">Evaluation Question Block {{ currentQuestionIndex + 1 }}</span>
+        <h4 class="timer">⏱ Countdown: {{ formattedTime }}</h4>
+      </div>
+
+      <div class="question-text">
+        <p *ngIf="currentQuestion; else loadingQ">
+          {{ currentQuestion?.question_text }}
+        </p>
+        <ng-template #loadingQ>
+          <p>⏳ Fetching active question matched to your course program configuration...</p>
+        </ng-template>
+      </div>
+
+      <textarea 
+        [(ngModel)]="answer"
+        rows="8"
+        placeholder="Your verbal responses will automatically transcribe directly inside this terminal view container window..."
+        readonly>
+      </textarea>
+      
+      <div class="footer-hint">
+        * Enunciate clearly. Data transmission occurs automatically when the timer reaches zero.
+      </div>
+    </div>
+  </div>
+
   <div class="completion" *ngIf="interviewCompleted">
-
-    <h2>🎉 Interview Completed</h2>
-    <p>Your responses have been recorded successfully.</p>
-
+    <div class="success-card">
+      <h2>🎉 Interview Session Concluded</h2>
+      <p>Your audio and video feeds have been saved, and answers have been processed against your course criteria.</p>
+      <button class="btn-dash" (click)="goToDashboard()">Return to Dashboard</button>
+    </div>
   </div>
 
 </div>

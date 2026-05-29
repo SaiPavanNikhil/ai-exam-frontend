@@ -1,0 +1,310 @@
+/* ==========================================================================
+   GLOBAL UTILITIES & CONTAINERS
+   ========================================================================== */
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* Smooth fade-in transition when switching operational tabs */
+.animate-fade-in {
+  animation: fadeIn 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==========================================================================
+   CARDS & WRAPPERS
+   ========================================================================== */
+.card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  padding: 1.75rem;
+  margin-bottom: 1.5rem;
+  transition: box-shadow 0.2s ease;
+}
+
+.card:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
+}
+
+/* ==========================================================================
+   TAB SWITCHER CONTROLS
+   ========================================================================== */
+.btn-group {
+  display: inline-flex;
+  background-color: #f1f5f9;
+  padding: 4px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+}
+
+.btn-group .btn {
+  border: none;
+  background: transparent;
+  color: #64748b;
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 8px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.btn-group .btn:hover {
+  color: #1e293b;
+}
+
+/* Custom class bindings mapped to Angular ngClass states */
+.btn-group .btn-primary {
+  background-color: #ffffff;
+  color: #4f46e5 !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+}
+
+.btn-group .btn-dark {
+  background-color: #0f172a;
+  color: #ffffff !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* ==========================================================================
+   FORM CONTROLS & FIELD INPUTS
+   ========================================================================== */
+.form-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.form-control,
+.form-select {
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 0.95rem;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #1e293b;
+  background-color: #ffffff;
+  background-clip: padding-box;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  box-sizing: border-box;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: #6366f1;
+  outline: 0;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+}
+
+.form-control::placeholder {
+  color: #94a3b8;
+}
+
+textarea.form-control {
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* Grid alignment mechanics matching standard system rows */
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  margin-right: -12px;
+  margin-left: -12px;
+}
+
+.col-md-4 {
+  flex: 0 0 auto;
+  width: 33.333333%;
+  padding: 0 12px;
+  box-sizing: border-box;
+}
+
+.col-md-6 {
+  flex: 0 0 auto;
+  width: 50%;
+  padding: 0 12px;
+  box-sizing: border-box;
+}
+
+.col-12 {
+  flex: 0 0 auto;
+  width: 100%;
+  padding: 0 12px;
+  box-sizing: border-box;
+}
+
+.g-3 {
+  row-gap: 1rem;
+}
+
+/* ==========================================================================
+   FILE DRAG & DROP MULTIPART BOX
+   ========================================================================== */
+.border-dashed {
+  border: 2px dashed #cbd5e1 !important;
+  background-color: #f8fafc;
+  transition: border-color 0.2s, background-color 0.2s;
+  cursor: pointer;
+}
+
+.border-dashed:hover {
+  border-color: #6366f1 !important;
+  background-color: #f5f3ff;
+}
+
+/* Hides native raw HTML button styling over custom visual layout template containers */
+.border-dashed input[type="file"] {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+/* ==========================================================================
+   BUTTON ARCHITECTURE
+   ========================================================================== */
+.btn-primary {
+  background-color: #4f46e5;
+  color: #ffffff;
+  border: 1px solid #4338ca;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: #4338ca;
+}
+
+.btn-dark {
+  background-color: #0f172a;
+  color: #ffffff;
+  border: 1px solid #020617;
+}
+
+.btn-dark:hover:not(:disabled) {
+  background-color: #1e293b;
+}
+
+.btn-lg {
+  padding: 12px 30px;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+}
+
+.btn-outline-secondary {
+  background: transparent;
+  border: 1px solid #cbd5e1;
+  color: #64748b;
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.15s ease;
+}
+
+.btn-outline-secondary:hover {
+  background: #f1f5f9;
+  color: #334155;
+  border-color: #94a3b8;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed !important;
+}
+
+/* ==========================================================================
+   ALERT SYSTEM BANNERS
+   ========================================================================== */
+.alert {
+  padding: 14px 20px;
+  border-radius: 10px;
+  font-size: 0.925rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+}
+
+.alert-success {
+  background-color: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
+.alert-danger {
+  background-color: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fca5a5;
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN ADAPTATIONS
+   ========================================================================== */
+@media (max-width: 768px) {
+  .col-md-4,
+  .col-md-6 {
+    width: 100%;
+  }
+  
+  .card .d-flex {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 15px;
+  }
+  
+  .btn-group {
+    width: 100%;
+  }
+  
+  .btn-group .btn {
+    flex-grow: 1;
+    text-align: center;
+  }
+}
+
+/* Container box constraints */
+.file-drop-zone {
+  position: relative;
+  overflow: hidden; /* Prevents hidden input overlay bounds from expanding out */
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+
+/* Explicitly sandboxed file element input */
+.file-input-field {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 2; /* Captures clicks ONLY inside the file-drop-zone wrapper boundary */
+}

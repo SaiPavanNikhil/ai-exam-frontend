@@ -1,0 +1,155 @@
+<div class="container my-5">
+  
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <button class="btn btn-outline-secondary btn-sm" (click)="goBack()">
+      <i class="bi bi-arrow-left"></i> Back to Schedule
+    </button>
+    <h2 class="mb-0 fw-bold text-dark">Question Bank Provisioning Hub</h2>
+  </div>
+
+  <div *ngIf="statusMessage" class="alert alert-success alert-dismissible fade show border-0 shadow-sm mb-4" role="alert">
+    <i class="bi bi-check-circle-fill me-2"></i> {{ statusMessage }}
+  </div>
+  <div *ngIf="errorMessage" class="alert alert-danger alert-dismissible fade show border-0 shadow-sm mb-4" role="alert">
+    <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ errorMessage }}
+  </div>
+
+  <div class="card border-0 shadow-sm p-3 mb-4" style="border-radius: 12px; background: #f8fafc;">
+    <div class="d-flex align-items-center justify-content-between">
+      <div>
+        <h5 class="mb-1 fw-bold text-slate-800">Choose Provisioning Method</h5>
+        <small class="text-muted">Select how questions should be appended to the course program bank.</small>
+      </div>
+      <div class="btn-group" role="group">
+        <button type="button" class="btn px-4" 
+                [ngClass]="activeTab === 'gemini' ? 'btn-primary' : 'btn-light border'"
+                (click)="switchTab('gemini')">
+          <i class="bi bi-cpu-fill me-1"></i> Gemini AI Mode
+        </button>
+        <button type="button" class="btn px-4" 
+                [ngClass]="activeTab === 'manual' ? 'btn-dark' : 'btn-light border'"
+                (click)="switchTab('manual')">
+          <i class="bi bi-pencil-square me-1"></i> Manual Form Mode
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="activeTab === 'gemini'" class="card border-0 shadow-sm p-4 animate-fade-in" style="border-radius: 16px;">
+    <div class="mb-4">
+      <h4 class="fw-bold text-indigo"><i class="bi bi-stars me-2 text-primary"></i>AI Course Syllabus Parsing</h4>
+      <p class="text-muted small">Upload a syllabus index blueprint context configuration file. Gemini will read the PDF text elements and synthesize distinct situational evaluation questions matched to that course program profile automatically.</p>
+    </div>
+
+    <form #geminiForm="ngForm" (ngInject)="onGenerate(geminiForm)" (submit)="$event.preventDefault()">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Target Course Program</label>
+          <select [(ngModel)]="selectedCourse" name="course" class="form-select" required>
+            <option value="" disabled selected>-- Choose Course Program --</option>
+            <option value="BBA">BBA</option>
+            <option value="MBA">MBA</option>
+            <option value="B-Tech">B-Tech</option>
+            <option value="MCA">MCA</option>
+            <option value="B.Com">B.Com</option>
+            <option value="M.Com">M.Com</option>
+          </select>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Number of Generated Questions</label>
+          <input type="number" [(ngModel)]="numQuestions" name="numQuestions" class="form-control" min="1" max="15" required />
+        </div>
+
+        <div class="col-12">
+          <label class="form-label fw-semibold">Reference Document Attachment (PDF Only)</label>
+          
+          <div class="file-drop-zone p-4 border border-dashed rounded-3 text-center bg-light position-relative">
+            <i class="bi bi-file-earmark-pdf-fill text-danger display-5 d-block mb-2"></i>
+            
+            <span class="d-block text-secondary small mb-2" *ngIf="!selectedFile">
+              Drag and drop or click to attach target syllabus resource mapping
+            </span>
+            <span class="d-block text-success fw-bold small mb-2" *ngIf="selectedFile">
+              ✓ Attached: {{ selectedFile.name }}
+            </span>
+            
+            <input type="file" (change)="onFileSelected($event)" accept="application/pdf" class="file-input-field" />
+          </div>
+        </div>
+
+        <div class="col-12 text-end mt-4">
+          <button type="button" class="btn btn-primary btn-lg px-5 shadow-sm" 
+                  (click)="onGenerate(geminiForm)"
+                  [disabled]="isLoading || !geminiForm.valid || !selectedFile">
+            <span class="spinner-border spinner-border-sm me-2" role="status" *ngIf="isLoading"></span>
+            <i class="bi bi-lightning-charge-fill me-1" *ngIf="!isLoading"></i> Generate with Gemini Core
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div *ngIf="activeTab === 'manual'" class="card border-0 shadow-sm p-4 animate-fade-in" style="border-radius: 16px;">
+    <div class="mb-4">
+      <h4 class="fw-bold text-slate-800"><i class="bi bi-database-add me-2 text-dark"></i>Manual Question Creation</h4>
+      <p class="text-muted small">Input single custom question string records, provide complete reference grading anchors, and set base tracking parameters directly into your global standard database bank structure.</p>
+    </div>
+
+    <form #manualForm="ngForm" (submit)="$event.preventDefault()">
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label fw-semibold">Target Course Program</label>
+          <select [(ngModel)]="manualCourse" name="manualCourse" class="form-select" required>
+            <option value="" disabled selected>-- Choose Course Program --</option>
+            <option value="BBA">BBA</option>
+            <option value="MBA">MBA</option>
+            <option value="B-Tech">B-Tech</option>
+            <option value="MCA">MCA</option>
+            <option value="B.Com">B.Com</option>
+            <option value="M.Com">M.Com</option>
+          </select>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label fw-semibold">Category Classification Tag</label>
+          <input type="text" [(ngModel)]="manualCategory" name="manualCategory" class="form-control" placeholder="e.g., Core Java, Financial Accounting" required />
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label fw-semibold">Difficulty Level</label>
+          <select [(ngModel)]="manualDifficulty" name="manualDifficulty" class="form-select" required>
+            <option value="Easy">Easy</option>
+            <option value="Medium" selected>Medium</option>
+            <option value="Hard">Hard</option>
+          </select>
+        </div>
+
+        <div class="col-12">
+          <label class="form-label fw-semibold">Question Text</label>
+          <textarea [(ngModel)]="manualQuestionText" name="manualQuestionText" class="form-control" rows="3" placeholder="Enter clear text prompt evaluation string here..." required></textarea>
+        </div>
+
+        <div class="col-12">
+          <label class="form-label fw-semibold">Expected Answer</label>
+          <textarea [(ngModel)]="manualExpectedAnswer" name="manualExpectedAnswer" class="form-control" rows="4" placeholder="Enter ideal structural keyword responses and syntax constraints for backend matching models..." required></textarea>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Time Limit Constraint (Seconds)</label>
+          <input type="number" [(ngModel)]="manualTimeLimit" name="manualTimeLimit" class="form-control" min="30" max="600" required />
+        </div>
+
+        <div class="col-12 text-end mt-4">
+          <button type="button" class="btn btn-dark btn-lg px-5 shadow-sm"
+                  (click)="onSubmitManual(manualForm)"
+                  [disabled]="isLoading || !manualForm.valid">
+            <span class="spinner-border spinner-border-sm me-2" role="status" *ngIf="isLoading"></span>
+            <i class="bi bi-cloud-arrow-up-fill me-1" *ngIf="!isLoading"></i> Save to Question Bank
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+</div>
