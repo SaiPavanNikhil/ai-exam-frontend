@@ -142,11 +142,16 @@ export class LandingPageComponent implements OnInit, OnDestroy {
         next: (res: any) => {
           this.loginLoading = false;
 
-          localStorage.setItem('user', JSON.stringify(res.user));
-          this.closeModal();
+          if (res.success && res.data) {
+            // 💡 FIX: Grab res.data (where id, name, and email live) instead of res.user
+            localStorage.setItem('user', JSON.stringify(res.data));
+            this.closeModal();
 
-          // ✅ Student redirect
-          this.router.navigate(['/exam']);
+            // ✅ Student redirect
+            this.router.navigate(['/exam']);
+          } else {
+            this.loginError = 'Login verified but session initialization data payload was corrupt.';
+          }
         },
         error: (err: any) => {
           this.loginLoading = false;

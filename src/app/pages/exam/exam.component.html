@@ -1,4 +1,4 @@
-<div class="container">
+<!-- <div class="container">
 
   <div class="header">
     <h2>AI Dynamic Interview System</h2>
@@ -103,5 +103,727 @@
       <button class="btn-dash" (click)="goToDashboard()">Return to Dashboard</button>
     </div>
   </div>
+
+</div>-->
+
+<!-- <div class="container">
+
+  <div class="header">
+    <h2>AI Dynamic Interview System</h2>
+    <p *ngIf="candidateName">Candidate: <strong>{{ candidateName }}</strong></p>
+    <p *ngIf="selectedCourse && !interviewId">Assigned Track: {{ selectedCourse }}</p>
+  </div>
+
+  <div class="mode-selection" *ngIf="mode === 'choice' && !interviewId" style="padding: 40px 20px; text-align: center;">
+    <div class="selection-card" style="background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); max-width: 600px; margin: 0 auto;">
+      <h2 style="font-size: 1.8rem; margin-bottom: 10px;">Select Assessment Mode</h2>
+      <p style="color: #6b7280; margin-bottom: 30px;">Choose how you would like your dynamic question matrix to initialize.</p>
+      
+      <div class="options-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        <div class="option-box" (click)="selectMode('self')" style="cursor: pointer; border: 2px solid #e5e7eb; padding: 25px; border-radius: 12px; transition: all 0.2s ease; background: #fff;" onmouseover="this.style.borderColor='#4f46e5'" onmouseout="this.style.borderColor='#e5e7eb'">
+          <div style="font-size: 2.5rem; margin-bottom: 10px;">📝</div>
+          <h3 style="margin: 0 0 8px 0; color: #1f2937;">Self-Assessment</h3>
+          <p style="font-size: 0.85rem; color: #6b7280; margin: 0;">Upload your custom syllabus PDF and generate practice criteria on the fly.</p>
+        </div>
+
+        <div class="option-box" (click)="selectMode('scheduled')" style="cursor: pointer; border: 2px solid #e5e7eb; padding: 25px; border-radius: 12px; transition: all 0.2s ease; background: #fff;" onmouseover="this.style.borderColor='#4f46e5'" onmouseout="this.style.borderColor='#e5e7eb'">
+          <div style="font-size: 2.5rem; margin-bottom: 10px;">📅</div>
+          <h3 style="margin: 0 0 8px 0; color: #1f2937;">Scheduled Assessment</h3>
+          <p style="font-size: 0.85rem; color: #6b7280; margin: 0;">Access an interview assignment linked directly to your remote profile parameters.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pre-check" *ngIf="mode !== 'choice' && !interviewId">
+    
+    <button (click)="backToChoice()" style="background: none; border: none; color: #4f46e5; font-weight: 500; cursor: pointer; margin-bottom: 20px; display: flex; align-items: center; gap: 5px;">
+      ← Change Assessment Mode
+    </button>
+    
+    <div class="setup-card" *ngIf="mode === 'self'" style="margin-bottom: 20px; padding: 20px; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e7eb;">
+      <h3>Step 1: Self-Assessment Configuration</h3>
+      
+<div class="form-group" style="margin-bottom: 15px;">
+  <label style="font-weight: 500;">Select Practice Track Course:</label>
+  <select [(ngModel)]="selectedCourse" (change)="loadQuestionsForSelectedCourse()" class="form-control" style="width: 100%; padding: 8px; margin-top: 5px; border-radius: 4px; border: 1px solid #d1d5db;">
+    <option value="">-- Select Track --</option>
+    
+    <option *ngFor="let course of allowedCourses" [value]="course">
+      {{ course }}
+    </option>
+  </select>
+</div>
+
+      <div class="form-group">
+        <label style="font-weight: 500;">Upload Blueprint Core Syllabus (PDF):</label>
+        <input type="file" (change)="onFileSelected($event)" accept="application/pdf" style="display: block; margin-top: 5px;">
+        
+        <div *ngIf="isGeneratingQuestions" style="margin-top: 10px; color: #4f46e5;">
+          ⏳ Processing syllabus vectors and parsing dynamic AI questions...
+        </div>
+        <div *ngIf="questionsGenerated" style="margin-top: 10px; color: #059669; font-weight: 500;">
+          ✅ Reference syllabus compiled! {{ generatedQuestionsCount }} evaluation items structured for {{ displaySubject || selectedCourse }}.
+        </div>
+      </div>
+    </div>
+
+    <div class="setup-card" *ngIf="mode === 'scheduled'" style="margin-bottom: 20px; padding: 20px; background: #eff6ff; border-radius: 8px; border: 1px solid #bfdbfe; border-left: 4px solid #3b82f6;">
+      <h3 style="color: #1e3a8a; margin-top: 0;">Step 1: Scheduled Institutional Profile</h3>
+      <p style="margin: 5px 0;"><strong>Verified Student:</strong> {{ candidateName || 'Verifying structural parameters...' }}</p>
+      <p style="margin: 5px 0;"><strong>Evaluation Unit:</strong> {{ selectedCourse || 'Resolving track database records...' }}</p>
+      <small style="color: #2563eb; font-style: italic;">* Questions are allocated remotely by internal dashboard admin panels.</small>
+    </div>
+
+    <div class="video-section">
+      <h3>Step 2: Face Verification Check</h3>
+      <video #video autoplay muted style="width: 100%; border-radius: 8px; background: #000; min-height: 240px;"></video>
+
+      <div class="status-box" style="margin-top: 10px;">
+        <p *ngIf="faceStatus === 'checking'">🔍 Calibrating workspace view parameters...</p>
+        <p *ngIf="faceStatus === 'success'" style="color: #059669; font-weight: bold;">
+          ✅ Workspace verification complete
+        </p>
+        <p *ngIf="faceStatus === 'error'" style="color: #dc2626; font-weight: bold;">
+          ❌ {{ faceError || 'Face detection matching checkpoint misaligned.' }}
+        </p>
+      </div>
+    </div>
+
+    <div class="audio-section" style="margin-top: 20px;">
+      <h3>Step 3: Microphone Meter Status</h3>
+      <div class="audio-meter" style="width: 100%; height: 12px; background: #e5e7eb; border-radius: 6px; overflow: hidden;">
+        <div class="audio-level" [style.width.%]="audioLevel" style="height: 100%; background: #10b981; transition: width 0.1s ease;"></div>
+      </div>
+      <p class="hint" style="font-size: 0.85rem; color: #6b7280; margin-top: 5px;">
+        🎤 Enounce clearly into your headset to confirm standard transmission levels.
+      </p>
+
+      <div class="instructions" style="margin-top: 25px; padding: 15px; background: #fff; border: 1px solid #e5e7eb; border-radius: 8px;">
+        <h3 style="margin-top: 0;">Exam Session Guidelines</h3>
+        <ul style="font-size: 0.9rem; line-height: 1.6; padding-left: 20px;">
+          <li>Keep your face positioned within the live camera viewport framework.</li>
+          <li>System focus lock is active. Do not alternate windows or drop tabs.</li>
+          <li>Your spoken responses will automatically transcribe into the answer viewport.</li>
+        </ul>
+
+        <div class="start-trigger" style="margin-top: 20px;">
+          <p class="start-note" style="border-left: 4px solid #4f46e5; background: #f5f3ff; padding: 12px; color: #4338ca; font-weight: 500;">
+            🔴 If you are ready to proceed, Say <strong>'Ok Lets Go'</strong> to initiate the assessment.
+          </p>
+          
+          <button class="btn-start" 
+                  (click)="startInterview()" 
+                  [disabled]="mode === 'self' && !questionsGenerated" 
+                  style="margin-top: 15px; width: 100%; padding: 12px; background: #4f46e5; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: background 0.2s;"
+                  [style.opacity]="(mode === 'self' && !questionsGenerated) ? '0.5' : '1'"
+                  [style.cursor]="(mode === 'self' && !questionsGenerated) ? 'not-allowed' : 'pointer'">
+            Launch {{ mode === 'self' ? 'Practice Lab' : 'Official Assessment Room' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="content" *ngIf="interviewId && !interviewCompleted">
+    <div class="video-section">
+      <h3>Live Monitoring</h3>
+      <video #video autoplay muted style="width: 100%; border-radius: 8px; background: #000; min-height: 240px;"></video>
+      <div class="live-indicator" style="margin-top: 10px; color: #dc2626; font-weight: bold; display: flex; align-items: center;">
+        <span class="dot" style="height: 10px; width: 10px; background: #dc2626; border-radius: 50%; display: inline-block; margin-right: 8px; animation: pulse 1.5s infinite;"></span> 
+        Recording Live Session...
+      </div>
+      
+      <div class="grading-toast" *ngIf="isGradingPrevious" style="margin-top: 10px; font-style: italic; color: #4f46e5;">
+        <p>⚙️ Analyzing evaluation matrix & metrics in background...</p>
+      </div>
+    </div>
+
+    <div class="question-section">
+      <div class="q-header" style="display: flex; justify-content: space-between; align-items: center;">
+        <span class="q-count" style="font-weight: 600; color: #374151;">Evaluation Question Block {{ currentQuestionIndex + 1 }}</span>
+        <h4 class="timer" [class.warning]="timeLeft < 10" style="margin: 0; color: #111827;">⏱ Countdown: {{ formattedTime }}</h4>
+      </div>
+
+      <div class="question-text" style="min-height: 80px; margin: 20px 0; font-size: 1.2rem; font-weight: 500; color: #111827; line-height: 1.5;">
+        <p *ngIf="currentQuestion; else loadingQ">
+          {{ currentQuestion?.question_text }}
+        </p>
+        <ng-template #loadingQ>
+          <p style="color: #6b7280; font-style: italic;">⏳ Fetching active question matched to your course program configuration...</p>
+        </ng-template>
+      </div>
+
+      <textarea 
+        [(ngModel)]="answer"
+        rows="8"
+        placeholder="Your verbal responses will automatically transcribe directly inside this terminal view container window..."
+        style="width: 100%; padding: 15px; border-radius: 8px; border: 1px solid #d1d5db; background: #f9fafb; font-family: inherit; font-size: 1rem; line-height: 1.5; resize: none;"
+        readonly>
+      </textarea>
+      
+      <div class="footer-hint" style="margin-top: 10px; font-size: 0.8rem; color: #6b7280;">
+        * Enunciate clearly. Data transmission occurs automatically when the timer reaches zero.
+      </div>
+    </div>
+  </div>
+
+  <div class="completion" *ngIf="interviewCompleted">
+    <div class="success-card" style="text-align: center; padding: 40px; background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); max-width: 500px; margin: 40px auto;">
+      <h2 style="font-size: 2rem; color: #111827; margin-top: 0;">🎉 Interview Session Concluded</h2>
+      <p style="color: #4b5563; margin: 20px 0; line-height: 1.5;">
+        Your audio and video feeds have been saved, and answers have been processed against your course criteria metrics.
+      </p>
+      <button class="btn-dash" (click)="goToDashboard()" style="padding: 12px 24px; background: #4f46e5; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; width: 100%; transition: background 0.2s;">
+        Return to Dashboard
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="interviewCompleted && mode === 'self'" class="result-container">
+
+  <h2>🎯 Self Assessment Result</h2>
+
+  <div class="result-card">
+
+    <p>
+      <strong>Course:</strong>
+      {{ completedCourse }}
+    </p>
+
+    <p>
+      <strong>Final Marks:</strong>
+      {{ finalMarks }}
+    </p>
+
+    <hr>
+
+    <h3>💪 Strengths</h3>
+
+    <ul *ngIf="finalResponse?.strengths?.length">
+      <li *ngFor="let strength of finalResponse.strengths">
+        {{ strength }}
+      </li>
+    </ul>
+
+    <h3>📈 Areas for Improvement</h3>
+
+    <ul *ngIf="finalResponse?.improvements?.length">
+      <li *ngFor="let improvement of finalResponse.improvements">
+        {{ improvement }}
+      </li>
+    </ul>
+
+    <h3>📝 Overall Summary</h3>
+
+    <p class="summary-text">
+      {{ finalResponse?.summary }}
+    </p>
+
+  </div>
+
+</div>
+
+</div> -->
+
+<div class="container">
+
+  <!-- ===================================================== -->
+  <!-- SCREEN 1 : MODE SELECTION -->
+  <!-- ===================================================== -->
+
+  <div
+    class="landing-screen"
+    *ngIf="mode === 'choice' && !interviewId">
+
+    <div class="landing-card">
+
+      <div class="logo-section">
+        <h1>AI Dynamic Interview Platform</h1>
+        <p>
+          Practice, evaluate and improve your technical interview skills
+        </p>
+      </div>
+
+      <div class="assessment-options">
+
+        <div
+          class="assessment-card"
+          (click)="selectMode('self')">
+
+          <div class="icon">📝</div>
+
+          <h3>Self Assessment</h3>
+
+          <p>
+            Practice interviews based on your assigned course track
+          </p>
+
+        </div>
+
+        <div
+          class="assessment-card"
+          (click)="selectMode('scheduled')">
+
+          <div class="icon">📅</div>
+
+          <h3>Scheduled Assessment</h3>
+
+          <p>
+            Official interview assigned by administrator
+          </p>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+    <!-- ===================================================== -->
+  <!-- SCREEN 2 : PRE CHECK -->
+  <!-- ===================================================== -->
+
+  <div
+    class="setup-screen"
+    *ngIf="mode !== 'choice' && !interviewId">
+
+    <button
+      class="back-btn"
+      (click)="backToChoice()">
+      ← Change Assessment Mode
+    </button>
+
+    <div class="setup-card">
+
+      <div class="step-header">
+
+        <h2>Setup Verification</h2>
+
+        <p>
+          Complete all checks before starting the interview
+        </p>
+
+      </div>
+
+      <!-- COURSE SELECTION -->
+
+      <div
+        class="course-section"
+        *ngIf="mode === 'self'">
+
+        <label>Select Course</label>
+
+        <select
+          [(ngModel)]="selectedCourse"
+          (change)="loadQuestionsForSelectedCourse()">
+
+          <option value="">
+            Select Course
+          </option>
+
+          <option
+            *ngFor="let course of allowedCourses"
+            [value]="course">
+
+            {{course}}
+
+          </option>
+
+        </select>
+
+      </div>
+
+      <!-- SCHEDULED INFO -->
+
+      <div *ngIf="mode === 'scheduled'">
+
+  <h2>Scheduled Assessment</h2>
+
+  <div *ngIf="scheduledInterviewStatus === 'none'">
+
+      No interview scheduled today.
+
+  </div>
+
+  <div *ngIf="scheduledInterviewStatus === 'upcoming'">
+
+      Interview scheduled later today.
+
+      {{ scheduledInterview?.scheduled_at }}
+
+  </div>
+
+  <div *ngIf="scheduledInterviewStatus === 'ready'">
+
+      Interview is ready.
+
+      <button
+        (click)="startInterview()">
+
+        Join Interview
+
+      </button>
+
+  </div>
+
+  <div *ngIf="scheduledInterviewStatus === 'expired'">
+
+      Interview time has passed.
+
+  </div>
+
+  <div *ngIf="scheduledInterviewStatus === 'completed'">
+
+      Interview already completed.
+
+  </div>
+
+</div>
+
+      <!-- SYSTEM STATUS -->
+
+      <div class="verification-grid">
+
+        <div
+          class="verify-card"
+          [class.success]="questionsGenerated || interviewQuestions.length > 0">
+
+          <div class="status-icon">
+            {{
+            (questionsGenerated || interviewQuestions.length > 0)
+            ? '✅'
+            : '⏳'
+            }}
+          </div>
+
+          <h4>Question Bank</h4>
+
+        </div>
+
+        <div
+          class="verify-card"
+          [class.success]="faceStatus === 'success'">
+
+          <div class="status-icon">
+            {{faceStatus === 'success' ? '✅' : '📷'}}
+          </div>
+
+          <h4>Face Verification</h4>
+
+        </div>
+
+        <div
+          class="verify-card"
+          [class.success]="audioLevel > 10">
+
+          <div class="status-icon">
+            {{audioLevel > 10 ? '✅' : '🎤'}}
+          </div>
+
+          <h4>Microphone</h4>
+
+        </div>
+
+        <div
+          class="verify-card"
+          [class.success]="isOkListenerActive">
+
+          <div class="status-icon">
+            {{isOkListenerActive ? '✅' : '🎙'}}
+          </div>
+
+          <h4>Voice Listener</h4>
+
+        </div>
+
+      </div>
+
+      <!-- CAMERA -->
+
+      <div class="camera-preview">
+
+        <video
+          #video
+          autoplay
+          muted
+          playsinline>
+        </video>
+
+      </div>
+
+      <!-- AUDIO METER -->
+
+      <div class="audio-section">
+
+        <label>Microphone Activity</label>
+
+        <div class="audio-meter">
+
+          <div
+            class="audio-level"
+            [style.width.%]="audioLevel">
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- READY -->
+
+      <div class="ready-section">
+
+        <div class="voice-command">
+
+          🎙 Say
+
+          <strong>
+            "Ok Lets Go"
+          </strong>
+
+          to begin the interview
+
+        </div>
+
+        <button
+          class="start-btn"
+          (click)="startInterview()">
+
+          Start Interview
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+    <!-- ===================================================== -->
+  <!-- SCREEN 3 : INTERVIEW ROOM -->
+  <!-- ===================================================== -->
+
+  <div
+    class="interview-room"
+    *ngIf="interviewId && !interviewCompleted">
+
+    <div class="room-layout">
+
+      <!-- LEFT -->
+
+      <div class="monitor-panel">
+
+        <h3>Live Monitoring</h3>
+
+        <video
+          #video
+          autoplay
+          muted>
+        </video>
+
+        <div class="live-status">
+
+          <span class="live-dot"></span>
+
+          LIVE
+
+        </div>
+
+      </div>
+
+      <!-- RIGHT -->
+
+      <div class="question-panel">
+
+        <div class="question-header">
+
+          <div class="question-counter">
+
+            Question
+
+            {{currentQuestionIndex + 1}}
+
+            /
+
+            {{interviewQuestions.length}}
+
+          </div>
+
+          <div
+            class="timer"
+            [class.warning]="timeLeft < 10">
+
+            {{formattedTime}}
+
+          </div>
+
+        </div>
+
+        <div class="question-box">
+
+          <ng-container *ngIf="currentQuestion">
+
+            {{currentQuestion.question_text}}
+
+          </ng-container>
+
+        </div>
+
+        <div
+          class="grading-status"
+          *ngIf="isGradingPrevious">
+
+          🤖 Evaluating Previous Answer...
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- TRANSCRIPT -->
+
+    <div class="transcript-section">
+
+      <h3>Live Transcript</h3>
+
+      <div class="transcript-box">
+
+        {{answer}}
+
+      </div>
+
+    </div>
+
+  </div>
+
+    <!-- ===================================================== -->
+  <!-- RESULT LOADER -->
+  <!-- ===================================================== -->
+
+  <div
+    class="result-loader"
+    *ngIf="isEvaluatingResult">
+
+    <div class="loader-card">
+
+      <div class="ai-spinner"></div>
+
+      <h2>Analyzing Interview</h2>
+
+      <p>Evaluating Technical Skills</p>
+
+      <p>Evaluating Communication</p>
+
+      <p>Generating Feedback</p>
+
+    </div>
+
+  </div>
+
+    <!-- ===================================================== -->
+  <!-- SCREEN 4 : RESULT -->
+  <!-- ===================================================== -->
+
+  <div
+    class="result-screen"
+    *ngIf="interviewCompleted && mode === 'self'">
+
+    <div class="result-wrapper">
+
+      <h1>Assessment Result</h1>
+
+      <!-- SCORE -->
+
+      <div class="score-card">
+
+        <div class="score-number">
+
+          {{finalMarks}}
+
+        </div>
+
+        <div class="score-label">
+
+          Overall Score
+
+        </div>
+
+      </div>
+
+      <!-- COURSE -->
+
+      <div class="course-badge">
+
+        {{completedCourse}}
+
+      </div>
+
+      <!-- STRENGTHS -->
+
+      <div class="result-card strengths">
+
+        <h3>💪 Strengths</h3>
+
+        <ul>
+
+          <li
+            *ngFor="let item of finalResponse?.strengths">
+
+            {{item}}
+
+          </li>
+
+        </ul>
+
+      </div>
+
+      <!-- IMPROVEMENTS -->
+
+      <div class="result-card improvements">
+
+        <h3>📈 Areas For Improvement</h3>
+
+        <ul>
+
+          <li
+            *ngFor="let item of finalResponse?.improvements">
+
+            {{item}}
+
+          </li>
+
+        </ul>
+
+      </div>
+
+      <!-- SUMMARY -->
+
+      <div class="result-card summary">
+
+        <h3>📝 AI Summary</h3>
+
+        <p>
+
+          {{finalResponse?.summary}}
+
+        </p>
+
+      </div>
+
+      <button
+        class="dashboard-btn"
+        (click)="goToDashboard()">
+
+        Return To Dashboard
+
+      </button>
+
+    </div>
+
+  </div>
+
+  
 
 </div>

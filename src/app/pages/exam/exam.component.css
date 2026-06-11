@@ -1,264 +1,718 @@
-/* ===== RESET & BASE ===== */
+/* =======================================================
+   GLOBAL
+======================================================= */
+
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
-/* ===== CONTAINER ===== */
+:host {
+  display: block;
+  min-height: 100vh;
+  background: linear-gradient(
+    135deg,
+    #0f172a,
+    #1e293b,
+    #111827
+  );
+  color: white;
+  font-family: "Inter", sans-serif;
+}
+
 .container {
   min-height: 100vh;
-  background-color: #f5f6f8;
-  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-  color: #1e2330;
+  padding: 30px;
 }
 
-/* ===== HEADER ===== */
-.header {
-  background-color: #1e2330;
-  padding: 18px 36px;
-  border-bottom: 3px solid #4f5fd5;
+/* =======================================================
+   LANDING SCREEN
+======================================================= */
+
+.landing-screen {
+  min-height: 90vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-.header h2,
-.header p {
-  color: #ffffff;
-  font-size: 20px;
-  font-weight: 500;
-}
-
-/* =========================================================
-   🔥 NEW: PRE-CHECK SECTION (FACE + AUDIO)
-========================================================= */
-.pre-check {
-  display: grid;
-  grid-template-columns: 1.2fr 1fr;
-  gap: 24px;
-  padding: 28px 36px;
-  max-width: 1280px;
-  margin: 0 auto;
-}
-
-@media (max-width: 860px) {
-  .pre-check {
-    grid-template-columns: 1fr;
-    padding: 20px 18px;
-  }
-}
-
-/* ===== SHARED CARD STYLE ===== */
-.video-section,
-.audio-section,
-.question-section {
-  background-color: #ffffff;
-  border-radius: 12px;
-  border: 1px solid #e2e5ec;
-  padding: 24px;
-}
-
-/* ===== SECTION HEADINGS ===== */
-.video-section h3,
-.audio-section h3,
-.question-section h3 {
-  font-size: 14px;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  color: #6b7280;
-  margin-bottom: 16px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid #e2e5ec;
-}
-
-/* ===== VIDEO ===== */
-.video-section video {
+.landing-card {
   width: 100%;
-  border-radius: 8px;
-  background-color: #0f1117;
-  aspect-ratio: 4 / 3;
+  max-width: 1100px;
+
+  background: rgba(255,255,255,0.06);
+
+  backdrop-filter: blur(18px);
+
+  border: 1px solid rgba(255,255,255,0.08);
+
+  border-radius: 28px;
+
+  padding: 60px;
+}
+
+.logo-section {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.logo-section h1 {
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.logo-section p {
+  color: #cbd5e1;
+  font-size: 1rem;
+}
+
+.assessment-options {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 30px;
+}
+
+.assessment-card {
+  cursor: pointer;
+
+  padding: 40px;
+
+  background: rgba(255,255,255,0.05);
+
+  border: 1px solid rgba(255,255,255,0.08);
+
+  border-radius: 20px;
+
+  transition: .3s ease;
+}
+
+.assessment-card:hover {
+  transform: translateY(-8px);
+
+  border-color: #6366f1;
+
+  box-shadow:
+      0 15px 40px rgba(99,102,241,.25);
+}
+
+.assessment-card .icon {
+  font-size: 3rem;
+  margin-bottom: 20px;
+}
+
+.assessment-card h3 {
+  margin-bottom: 12px;
+}
+
+.assessment-card p {
+  color: #cbd5e1;
+  line-height: 1.6;
+}
+
+/* =======================================================
+   SETUP SCREEN
+======================================================= */
+
+.setup-screen {
+  max-width: 1200px;
+  margin: auto;
+}
+
+.back-btn {
+  background: transparent;
+  border: none;
+  color: #818cf8;
+  cursor: pointer;
+  margin-bottom: 25px;
+  font-size: 14px;
+}
+
+.setup-card {
+  background: rgba(255,255,255,0.06);
+
+  backdrop-filter: blur(16px);
+
+  border-radius: 24px;
+
+  padding: 40px;
+
+  border: 1px solid rgba(255,255,255,.08);
+}
+
+.step-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.step-header h2 {
+  margin-bottom: 10px;
+}
+
+.step-header p {
+  color: #cbd5e1;
+}
+
+.course-section {
+  margin-bottom: 40px;
+}
+
+.course-section label {
+  display: block;
+  margin-bottom: 10px;
+}
+
+.course-section select {
+  width: 100%;
+  padding: 14px;
+
+  border-radius: 12px;
+
+  background: #1e293b;
+
+  color: white;
+
+  border: 1px solid #334155;
+}
+
+.scheduled-info {
+  margin-bottom: 35px;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+}
+
+.info-row span {
+  color: #cbd5e1;
+}
+
+/* =======================================================
+   VERIFICATION GRID
+======================================================= */
+
+.verification-grid {
+  display: grid;
+
+  grid-template-columns: repeat(4, 1fr);
+
+  gap: 20px;
+
+  margin-bottom: 40px;
+}
+
+.verify-card {
+  text-align: center;
+
+  padding: 25px;
+
+  border-radius: 18px;
+
+  background: rgba(255,255,255,.04);
+
+  border: 1px solid rgba(255,255,255,.08);
+
+  transition: .3s;
+}
+
+.verify-card.success {
+  border-color: #10b981;
+
+  box-shadow:
+      0 0 25px rgba(16,185,129,.25);
+}
+
+.status-icon {
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+
+/* =======================================================
+   CAMERA
+======================================================= */
+
+.camera-preview {
+  margin-bottom: 30px;
+}
+
+.camera-preview video {
+  width: 100%;
+  height: 420px;
+
   object-fit: cover;
+
+  border-radius: 20px;
+
+  background: black;
+}
+
+/* =======================================================
+   AUDIO METER
+======================================================= */
+
+.audio-section {
+  margin-bottom: 30px;
+}
+
+.audio-section label {
   display: block;
   margin-bottom: 12px;
 }
 
-/* ===== FACE STATUS ===== */
-.video-section p {
-  font-size: 13px;
-  margin-top: 6px;
-}
-
-/* =========================================================
-   🔥 AUDIO METER
-========================================================= */
 .audio-meter {
-  width: 100%;
-  height: 22px;
-  background: #e5e7eb;
-  border-radius: 12px;
+  height: 14px;
+
+  background: #334155;
+
+  border-radius: 50px;
+
   overflow: hidden;
-  margin-bottom: 12px;
 }
 
 .audio-level {
   height: 100%;
-  width: 0%;
-  background: linear-gradient(90deg, #22c55e, #f59e0b, #ef4444);
-  transition: width 0.1s linear;
+
+  background:
+      linear-gradient(
+          90deg,
+          #10b981,
+          #34d399
+      );
+
+  transition: .2s;
 }
 
-/* =========================================================
-   🔥 INSTRUCTIONS
-========================================================= */
-.instructions {
-  margin-top: 20px;
-}
+/* =======================================================
+   READY SECTION
+======================================================= */
 
-.instructions ul {
-  padding-left: 18px;
-}
-
-.instructions li {
-  font-size: 14px;
-  margin-bottom: 8px;
-  color: #374151;
-}
-
-/* 🔴 RED NOTE */
-.start-note {
-  margin-top: 14px;
-  padding: 12px;
-  background-color: #ffe5e5;
-  border-left: 4px solid #dc2626;
-  color: #b91c1c;
-  font-size: 14px;
-  font-weight: 600;
-  border-radius: 6px;
-}
-
-/* =========================================================
-   EXISTING INTERVIEW UI (UNCHANGED)
-========================================================= */
-
-/* ===== MAIN CONTENT ===== */
-.content {
-  display: grid;
-  grid-template-columns: 1.6fr 1fr;
-  gap: 24px;
-  padding: 28px 36px;
-  max-width: 1280px;
-  margin: 0 auto;
-}
-
-@media (max-width: 860px) {
-  .content {
-    grid-template-columns: 1fr;
-    padding: 20px 18px;
-  }
-}
-
-/* ===== VIDEO STATUS ===== */
-.video-section p[style*="color: red"] {
-  font-size: 13px;
-  color: #dc2626 !important;
-  font-weight: 500;
-}
-
-.video-section p[style*="color: gray"] {
-  font-size: 12px;
-  color: #9ca3af !important;
-}
-
-/* ===== QUESTION ===== */
-.question-section p:not([style]) {
-  font-size: 16px;
-  line-height: 1.7;
-  margin-bottom: 16px;
-}
-
-/* Replay button */
-.replay-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: transparent;
-  color: #4f5fd5;
-  border: 1px solid #4f5fd5;
-  padding: 7px 16px;
-  border-radius: 6px;
-  font-size: 13px;
-  cursor: pointer;
-  margin-bottom: 18px;
-}
-
-.replay-btn:hover {
-  background-color: #4f5fd5;
-  color: #ffffff;
-}
-
-/* Timer */
-.question-section h4 {
-  font-size: 15px;
-  color: #374151;
-  background-color: #f5f6f8;
-  display: inline-block;
-  padding: 6px 14px;
-  border-radius: 6px;
-  margin-bottom: 10px;
-  border: 1px solid #e2e5ec;
-}
-
-/* Warning */
-.question-section p[style*="color: red"] {
-  font-size: 13px;
-  color: #dc2626 !important;
-}
-
-/* Textarea */
-.question-section textarea {
-  width: 100%;
-  resize: none;
-  background-color: #f9fafb;
-  border: 1px solid #e2e5ec;
-  border-radius: 8px;
-  padding: 120px 16px 10px;
-  font-size: 14px;
-  color: #374151;
-  margin-top: 8px;
-}
-
-.question-section textarea:focus {
-  border-color: #4f5fd5;
-  box-shadow: 0 0 0 3px rgba(79, 95, 213, 0.1);
-}
-
-/* Mic info */
-.question-section p[style*="color: orange"] {
-  font-size: 13px;
-  color: #d97706 !important;
-  margin-top: 12px;
-}
-
-/* ===== BUTTON GROUP ===== */
-.btn-group {
-  display: flex;
-  gap: 12px;
-}
-
-/* ===== COMPLETION ===== */
-.completion {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 80vh;
+.ready-section {
+  margin-top: 35px;
   text-align: center;
 }
 
-.completion h2 {
-  font-size: 26px;
+.voice-command {
+  background: rgba(99,102,241,.15);
+
+  border-left: 4px solid #6366f1;
+
+  padding: 20px;
+
+  border-radius: 14px;
+
+  margin-bottom: 20px;
 }
 
-.completion p {
-  font-size: 15px;
-  color: #6b7280;
+.start-btn {
+  width: 100%;
+
+  padding: 16px;
+
+  border: none;
+
+  border-radius: 14px;
+
+  background:
+      linear-gradient(
+          135deg,
+          #6366f1,
+          #8b5cf6
+      );
+
+  color: white;
+
+  font-size: 16px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.start-btn:hover {
+  opacity: .9;
+}
+
+/* =======================================================
+   INTERVIEW ROOM
+======================================================= */
+
+.interview-room {
+  max-width: 1400px;
+  margin: auto;
+}
+
+.room-layout {
+  display: grid;
+
+  grid-template-columns: 400px 1fr;
+
+  gap: 25px;
+}
+
+.monitor-panel,
+.question-panel {
+  background: rgba(255,255,255,.06);
+
+  border-radius: 24px;
+
+  padding: 25px;
+
+  backdrop-filter: blur(18px);
+
+  border: 1px solid rgba(255,255,255,.08);
+}
+
+.monitor-panel video {
+  width: 100%;
+  border-radius: 16px;
+  margin-top: 20px;
+}
+
+.live-status {
+  margin-top: 20px;
+
+  color: #ef4444;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  font-weight: 600;
+}
+
+.live-dot {
+  width: 10px;
+  height: 10px;
+
+  background: #ef4444;
+
+  border-radius: 50%;
+
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  50% {
+    transform: scale(1.4);
+    opacity: .5;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* =======================================================
+   QUESTION
+======================================================= */
+
+.question-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  margin-bottom: 25px;
+}
+
+.question-counter {
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.timer {
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.timer.warning {
+  color: #ef4444;
+}
+
+.question-box {
+  min-height: 250px;
+
+  display: flex;
+  align-items: center;
+
+  font-size: 1.3rem;
+
+  line-height: 1.8;
+}
+
+.grading-status {
+  margin-top: 20px;
+  color: #818cf8;
+}
+
+/* =======================================================
+   TRANSCRIPT
+======================================================= */
+
+.transcript-section {
+  margin-top: 25px;
+
+  background: rgba(255,255,255,.06);
+
+  border-radius: 24px;
+
+  padding: 25px;
+}
+
+.transcript-section h3 {
+  margin-bottom: 15px;
+}
+
+.transcript-box {
+  min-height: 220px;
+
+  background: #111827;
+
+  border-radius: 18px;
+
+  padding: 20px;
+
+  line-height: 1.8;
+
+  overflow-y: auto;
+
+  border: 1px solid rgba(255,255,255,.08);
+}
+
+/* =======================================================
+   LOADER
+======================================================= */
+
+.result-loader {
+  position: fixed;
+
+  inset: 0;
+
+  background: rgba(0,0,0,.85);
+
+  backdrop-filter: blur(10px);
+
+  z-index: 99999;
+
+  display: flex;
+
+  justify-content: center;
+  align-items: center;
+}
+
+.loader-card {
+  text-align: center;
+}
+
+.ai-spinner {
+  width: 90px;
+  height: 90px;
+
+  border-radius: 50%;
+
+  border: 7px solid rgba(255,255,255,.2);
+
+  border-top-color: #6366f1;
+
+  margin: auto;
+
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loader-card h2 {
+  margin: 25px 0;
+}
+
+/* =======================================================
+   RESULT DASHBOARD
+======================================================= */
+
+.result-screen {
+  max-width: 1000px;
+  margin: auto;
+}
+
+.result-wrapper {
+  text-align: center;
+}
+
+.result-wrapper h1 {
+  margin-bottom: 35px;
+}
+
+.score-card {
+  width: 240px;
+  height: 240px;
+
+  margin: auto 0 40px auto;
+
+  border-radius: 50%;
+
+  background:
+      linear-gradient(
+          135deg,
+          #6366f1,
+          #8b5cf6
+      );
+
+  display: flex;
+
+  flex-direction: column;
+
+  justify-content: center;
+  align-items: center;
+}
+
+.score-number {
+  font-size: 4rem;
+  font-weight: 700;
+}
+
+.score-label {
+  margin-top: 10px;
+}
+
+.course-badge {
+  display: inline-block;
+
+  margin-bottom: 30px;
+
+  padding: 12px 24px;
+
+  background: rgba(255,255,255,.08);
+
+  border-radius: 50px;
+}
+
+.result-card {
+  text-align: left;
+
+  background: rgba(255,255,255,.06);
+
+  border-radius: 20px;
+
+  padding: 25px;
+
+  margin-bottom: 20px;
+}
+
+.result-card h3 {
+  margin-bottom: 15px;
+}
+
+.result-card ul {
+  padding-left: 20px;
+}
+
+.result-card li {
+  margin-bottom: 10px;
+}
+
+.result-card.summary p {
+  line-height: 1.8;
+}
+
+.strengths {
+  border-left: 5px solid #10b981;
+}
+
+.improvements {
+  border-left: 5px solid #f59e0b;
+}
+
+.summary {
+  border-left: 5px solid #6366f1;
+}
+
+.dashboard-btn {
+  margin-top: 25px;
+
+  width: 100%;
+
+  padding: 16px;
+
+  border: none;
+
+  border-radius: 16px;
+
+  background:
+      linear-gradient(
+          135deg,
+          #6366f1,
+          #8b5cf6
+      );
+
+  color: white;
+
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+/* =======================================================
+   RESPONSIVE
+======================================================= */
+
+@media(max-width:992px){
+
+  .assessment-options{
+      grid-template-columns:1fr;
+  }
+
+  .verification-grid{
+      grid-template-columns:repeat(2,1fr);
+  }
+
+  .room-layout{
+      grid-template-columns:1fr;
+  }
+}
+
+@media(max-width:768px){
+
+  .container{
+      padding:15px;
+  }
+
+  .landing-card,
+  .setup-card{
+      padding:25px;
+  }
+
+  .verification-grid{
+      grid-template-columns:1fr;
+  }
+
+  .logo-section h1{
+      font-size:2rem;
+  }
+
+  .score-card{
+      width:180px;
+      height:180px;
+  }
+
+  .score-number{
+      font-size:3rem;
+  }
 }

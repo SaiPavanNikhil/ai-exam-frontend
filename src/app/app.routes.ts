@@ -7,6 +7,7 @@ import { ChairmanDashboardComponent } from './pages/chairman-dashboard/chairman-
 import { AddMemberComponent } from './pages/add-member/add-member.component';
 import { AddQuestionsComponent } from './pages/add-questions/add-questions.component';
 import { CandidateLoginComponent } from './pages/candidate-login/candidate-login.component';
+import { RegisterStudentsComponent } from './pages/register-students/register-students.component';
 
 export const routes: Routes = [
     // { path: '', component: ExamComponent },
@@ -23,4 +24,5 @@ export const routes: Routes = [
          { path: 'add-member', component: AddMemberComponent },
       { path: 'add-question', component: AddQuestionsComponent },
       { path: 'login', component: CandidateLoginComponent },
+      { path: 'register-candidate', component: RegisterStudentsComponent },
 ];

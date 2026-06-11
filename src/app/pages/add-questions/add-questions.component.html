@@ -24,12 +24,12 @@
         <button type="button" class="btn px-4" 
                 [ngClass]="activeTab === 'gemini' ? 'btn-primary' : 'btn-light border'"
                 (click)="switchTab('gemini')">
-          <i class="bi bi-cpu-fill me-1"></i> Gemini AI Mode
+          <i class="bi bi-cpu-fill me-1"></i> AI Mode
         </button>
         <button type="button" class="btn px-4" 
                 [ngClass]="activeTab === 'manual' ? 'btn-dark' : 'btn-light border'"
                 (click)="switchTab('manual')">
-          <i class="bi bi-pencil-square me-1"></i> Manual Form Mode
+          <i class="bi bi-pencil-square me-1"></i> Global Form 
         </button>
       </div>
     </div>
@@ -38,7 +38,7 @@
   <div *ngIf="activeTab === 'gemini'" class="card border-0 shadow-sm p-4 animate-fade-in" style="border-radius: 16px;">
     <div class="mb-4">
       <h4 class="fw-bold text-indigo"><i class="bi bi-stars me-2 text-primary"></i>AI Course Syllabus Parsing</h4>
-      <p class="text-muted small">Upload a syllabus index blueprint context configuration file. Gemini will read the PDF text elements and synthesize distinct situational evaluation questions matched to that course program profile automatically.</p>
+      <p class="text-muted small">Upload a syllabus index blueprint context configuration file. AI will read the PDF text elements and synthesize distinct situational evaluation questions matched to that course program profile automatically.</p>
     </div>
 
     <form #geminiForm="ngForm" (ngInject)="onGenerate(geminiForm)" (submit)="$event.preventDefault()">
@@ -112,7 +112,7 @@
         </div>
 
         <div class="col-md-4">
-          <label class="form-label fw-semibold">Category Classification Tag</label>
+          <label class="form-label fw-semibold">Subject</label>
           <input type="text" [(ngModel)]="manualCategory" name="manualCategory" class="form-control" placeholder="e.g., Core Java, Financial Accounting" required />
         </div>
 
