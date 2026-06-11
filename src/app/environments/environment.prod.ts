@@ -1,0 +1,8 @@
+console.log("Host:", window.location.hostname);
+
+console.log("origin:", window.location.origin);
+
+export const environment = {
+  production: true,
+  apiUrl: 'https://ai-exam-backend-code-production.up.railway.app'
+};
