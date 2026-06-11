@@ -4,5 +4,5 @@ console.log("origin:", window.location.origin);
 
 export const environment = {
   production: true,
-  apiBaseUrl: `${window.location.origin}/ai-exam-backend-code-production.up.railway.app`
+  apiBaseUrl: 'https://ai-exam-backend-code-production.up.railway.app'
 };
