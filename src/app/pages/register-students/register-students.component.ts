@@ -21,7 +21,7 @@ export class RegisterStudentsComponent {
   statusMessage: string = '';
   errorMessage: string = '';
 
-  private apiUrl = 'http://127.0.0.1:8000';
+  private apiUrl = 'https://ai-exam-backend-code-production.up.railway.app';
 
   // 👈 Inject the ChangeDetector reference into the constructor
   constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}

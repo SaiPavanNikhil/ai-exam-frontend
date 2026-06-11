@@ -137,7 +137,7 @@ export class LandingPageComponent implements OnInit, OnDestroy {
       phone: this.loginPassword
     };
 
-    this.http.post<any>('http://127.0.0.1:8000/api/candidate/login', payload)
+    this.http.post<any>('https://ai-exam-backend-code-production.up.railway.app/api/candidate/login', payload)
       .subscribe({
         next: (res: any) => {
           this.loginLoading = false;

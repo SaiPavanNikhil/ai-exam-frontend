@@ -36,7 +36,7 @@ export class AddMemberComponent {
         memberType: this.member.memberType   // ✅ added
       };
 
-      this.http.post('http://127.0.0.1:8000/register', payload)
+      this.http.post('https://ai-exam-backend-code-production.up.railway.app/register', payload)
         .subscribe({
           next: (res) => {
             console.log('Saved:', res);

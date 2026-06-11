@@ -1048,7 +1048,7 @@ selectMode(choice: 'self' | 'scheduled') {
 
 fetchLatestInterviewHandshake() {
   // 💡 QUICK FIX: Query using email so the backend can link your candidate table rows together!
-  this.http.get<any>(`http://127.0.0.1:8000/api/interviews/latest?email=${this.candidateEmail}`)
+  this.http.get<any>(`https://ai-exam-backend-code-production.up.railway.app/api/interviews/latest?email=${this.candidateEmail}`)
     .subscribe({
       next: (res: any) => {
         if (res.success && res.data?.interview) {
@@ -1084,7 +1084,7 @@ loadQuestionsForSelectedCourse() {
 
   console.log(`📡 Fetching question inventory for Candidate ID: ${this.candidateId}, Course: ${this.selectedCourse}`);
 
-  this.http.get<any>(`http://127.0.0.1:8000/api/get-questions-by-candidate/${this.candidateId}?selected_course=${this.selectedCourse}`)
+  this.http.get<any>(`https://ai-exam-backend-code-production.up.railway.app/api/get-questions-by-candidate/${this.candidateId}?selected_course=${this.selectedCourse}`)
     .subscribe({
       next: (qRes: any) => {
         if (qRes.success && qRes.questions && qRes.questions.length > 0) {

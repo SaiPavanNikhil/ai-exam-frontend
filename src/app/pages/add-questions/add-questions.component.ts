@@ -34,7 +34,7 @@ export class AddQuestionsComponent {
   errorMessage: string = '';
 
   // ✅ Centralized API Base target path variable
-  private apiUrl = 'http://127.0.0.1:8000';
+  private apiUrl = 'https://ai-exam-backend-code-production.up.railway.app';
 
   constructor(private http: HttpClient, private router: Router) {}
 

@@ -30,7 +30,7 @@ export class CandidateLoginComponent {
 
   this.loading = true;
 
-  this.http.post<any>('http://127.0.0.1:8000/api/candidate/login', {
+  this.http.post<any>('https://ai-exam-backend-code-production.up.railway.app/api/candidate/login', {
     email: this.email,
     phone: this.phone
   }).subscribe({

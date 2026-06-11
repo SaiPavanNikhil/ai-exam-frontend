@@ -7,7 +7,7 @@ import { Injectable } from '@angular/core';
 export class InterviewService {
 
 
-   private baseUrl = 'http://127.0.0.1:8000';
+   private baseUrl = 'https://ai-exam-backend-code-production.up.railway.app';
 
   constructor(private http: HttpClient) {}
 
