@@ -1,4 +1,4 @@
-import { Component, ElementRef, ViewChild, OnInit, OnDestroy, ChangeDetectorRef, NgZone } from '@angular/core';
+`import { Component, ElementRef, ViewChild, OnInit, OnDestroy, ChangeDetectorRef, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -528,8 +528,10 @@ async launchHardwareAndMediaPipelines() {
 
   console.log('🔌 Initializing WebSocket...');
 
-  this.socket = new WebSocket('ws://127.0.0.1:8000/ws/audio');
-
+  // this.socket = new WebSocket('ws://127.0.0.1:8000/ws/audio');
+this.socket = new WebSocket(
+  'wss://ai-exam-backend-code-production.up.railway.app/ws/audio'
+);
   this.socket.onopen = () => {
     console.log('✅ WebSocket Connected');
   };
