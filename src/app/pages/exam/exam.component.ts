@@ -530,7 +530,7 @@ async launchHardwareAndMediaPipelines() {
 
   // this.socket = new WebSocket('ws://127.0.0.1:8000/ws/audio');
 this.socket = new WebSocket(
-  'ws://ai-exam-backend-code-production.up.railway.app/ws/audio'
+  'wss://ai-exam-backend-code-production.up.railway.app/ws/audio'
 );
   this.socket.onopen = () => {
     console.log('✅ WebSocket Connected');
