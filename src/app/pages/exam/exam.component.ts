@@ -14,7 +14,7 @@ import { environment } from '../../environments/environment.service';
 })
 export class ExamComponent implements OnInit, OnDestroy {
 
-  @ViewChild('video') videoRef!: ElementRef;
+  // @ViewChild('video') videoRef!: ElementRef;
 
   // ---------------- STREAMS ----------------
   combinedStream: MediaStream | null = null;
@@ -481,7 +481,7 @@ async launchHardwareAndMediaPipelines() {
     this.audioStream =
         new MediaStream(this.combinedStream.getAudioTracks());
 
-    this.videoRef.nativeElement.srcObject =
+    this._videoRef.nativeElement.srcObject =
         this.videoStream;
 }
 
@@ -601,13 +601,13 @@ initWebSocket() {
       }
     };
   }
-  private _videoRef!: ElementRef<HTMLVideoElement>;
+ private _videoRef!: ElementRef<HTMLVideoElement>;
 
-@ViewChild('video', { static: false }) set videoContent(content: ElementRef<HTMLVideoElement>) {
+@ViewChild('video', { static: false })
+set videoContent(content: ElementRef<HTMLVideoElement>) {
   if (content) {
     this._videoRef = content;
-    // If the stream was already resolved while the user was on the selection screen, 
-    // immediately attach it here the moment the DOM element renders!
+
     if (this.videoStream) {
       this._videoRef.nativeElement.srcObject = this.videoStream;
     }
@@ -656,7 +656,7 @@ async initPreCheck() {
     this.faceStatus = 'checking';
     this.preCheckInterval = setInterval(() => {
       const canvas = document.createElement('canvas');
-      const video = this.videoRef.nativeElement;
+      const video = this._videoRef.nativeElement;
       if (!video.videoWidth) return;
       canvas.width = video.videoWidth; canvas.height = video.videoHeight;
       canvas.getContext('2d')!.drawImage(video, 0, 0);
