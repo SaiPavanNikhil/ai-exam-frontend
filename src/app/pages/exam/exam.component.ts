@@ -1,4 +1,4 @@
-import { Component, ElementRef, ViewChild, OnInit, OnDestroy, ChangeDetectorRef, NgZone } from '@angular/core';
+`import { Component, ElementRef, ViewChild, OnInit, OnDestroy, ChangeDetectorRef, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -14,7 +14,7 @@ import { environment } from '../../environments/environment.service';
 })
 export class ExamComponent implements OnInit, OnDestroy {
 
-  @ViewChild('video') videoRef!: ElementRef;
+  // @ViewChild('video') videoRef!: ElementRef;
 
   // ---------------- STREAMS ----------------
   combinedStream: MediaStream | null = null;
@@ -224,11 +224,14 @@ startInterview() {
       this.interviewId =
         `SELF-PRACTICE-${Date.now()}`;
     }
+    
 
     this.launchHardwareAndMediaPipelines();
 
     return;
   }
+
+  
 
   // =====================================================
   // SCHEDULED ASSESSMENT
@@ -293,9 +296,7 @@ startInterview() {
   });
 
   return;
-}
-
-}
+}}
 
 /**
  * Helper function to cleanly trigger webcam layouts, clocks, and websockets 
@@ -309,7 +310,7 @@ async launchHardwareAndMediaPipelines() {
 
   this.startVideoRecording();
   this.initWebSocket();
-  this.startAudioStreaming();
+  // this.startAudioStreaming();
   
   this.loadNextQuestion();
   this.startTimer();
@@ -483,7 +484,7 @@ async launchHardwareAndMediaPipelines() {
     this.audioStream =
         new MediaStream(this.combinedStream.getAudioTracks());
 
-    this.videoRef.nativeElement.srcObject =
+    this._videoRef.nativeElement.srcObject =
         this.videoStream;
 }
 
@@ -526,41 +527,56 @@ async launchHardwareAndMediaPipelines() {
 
 }
 
-  initWebSocket() {
+initWebSocket() {
 
-  console.log('🔌 Initializing WebSocket...');
+  console.log("Opening websocket...");
 
-  this.socket = new WebSocket('ws://127.0.0.1:8000/ws/audio');
+  this.socket = new WebSocket(
+    "wss://ai-exam-backend-code-production.up.railway.app/ws/audio"
+  );
+
+  this.socket.binaryType = "arraybuffer";
 
   this.socket.onopen = () => {
-    console.log('✅ WebSocket Connected');
+
+    console.log("✅ WebSocket Connected");
+
+    this.startAudioStreaming();
+
   };
 
   this.socket.onmessage = (event) => {
 
-  const data = JSON.parse(event.data);
+    console.log(event.data);
 
-  this.ngZone.run(() => {
+    const data = JSON.parse(event.data);
 
-    if (data.transcript && !this.isSpeaking) {
+    if (data.transcript) {
 
-      this.answer += ' ' + data.transcript;
+      this.ngZone.run(() => {
 
-      console.log('Transcript Added:', data.transcript);
+        this.answer += " " + data.transcript;
 
-      this.cdr.detectChanges();
+        this.cdr.detectChanges();
+
+      });
+
     }
 
-  });
-};
-
-  this.socket.onerror = (err) => {
-    console.error('❌ WebSocket Error:', err);
   };
 
-  this.socket.onclose = () => {
-    console.log('🔌 WebSocket Closed');
+  this.socket.onerror = (e) => {
+
+    console.error("Websocket error", e);
+
   };
+
+  this.socket.onclose = (e) => {
+
+    console.log("Socket closed", e);
+
+  };
+
 }
 
   startAudioStreaming() {
@@ -588,13 +604,13 @@ async launchHardwareAndMediaPipelines() {
       }
     };
   }
-  private _videoRef!: ElementRef<HTMLVideoElement>;
+ private _videoRef!: ElementRef<HTMLVideoElement>;
 
-@ViewChild('video', { static: false }) set videoContent(content: ElementRef<HTMLVideoElement>) {
+@ViewChild('video', { static: false })
+set videoContent(content: ElementRef<HTMLVideoElement>) {
   if (content) {
     this._videoRef = content;
-    // If the stream was already resolved while the user was on the selection screen, 
-    // immediately attach it here the moment the DOM element renders!
+
     if (this.videoStream) {
       this._videoRef.nativeElement.srcObject = this.videoStream;
     }
@@ -643,7 +659,7 @@ async initPreCheck() {
     this.faceStatus = 'checking';
     this.preCheckInterval = setInterval(() => {
       const canvas = document.createElement('canvas');
-      const video = this.videoRef.nativeElement;
+      const video = this._videoRef.nativeElement;
       if (!video.videoWidth) return;
       canvas.width = video.videoWidth; canvas.height = video.videoHeight;
       canvas.getContext('2d')!.drawImage(video, 0, 0);
