@@ -92,6 +92,8 @@ export class ExamComponent implements OnInit, OnDestroy {
 
   isCheckingSchedule: boolean = false;
 
+  isInterviewFinishing = false;
+
 
   socket!: WebSocket;
   currentQuestionText: any;
@@ -376,6 +378,13 @@ async launchHardwareAndMediaPipelines() {
 
   handleNextQuestion() {
 
+    if (
+      this.interviewCompleted ||
+      this.isInterviewFinishing
+    ) {
+      return;
+    }
+
     console.log('➡️ handleNextQuestion called');
 
     if (this.mode === 'self') {
@@ -384,21 +393,14 @@ async launchHardwareAndMediaPipelines() {
       this.saveAnswer();
     }
 
-    console.log('Current Index Before:', this.currentQuestionIndex);
-
     this.currentQuestionIndex++;
-
-    console.log('Current Index After:', this.currentQuestionIndex);
 
     this.answer = '';
 
-    console.log('Calling loadNextQuestion');
-
     this.loadNextQuestion();
 
-    console.log('Calling resetTimer');
-
     this.resetTimer();
+
   }
 
   // ================= 4. LOAD NEXT COMPLIANT QUESTION =================
@@ -827,6 +829,7 @@ async initPreCheck() {
         this.timeLeft--;
 
       } else {
+        clearInterval(this.interval);
 
         this.handleNextQuestion();
       }
@@ -886,62 +889,45 @@ async initPreCheck() {
   // }
   async finishInterview() {
 
-  console.log(
-    '🏁 Interview Finished'
-  );
+    if (this.isInterviewFinishing) {
+      return;
+    }
 
-  // -----------------------------------------
-  // Generate self-assessment result
-  // -----------------------------------------
+    this.isInterviewFinishing = true;
 
-  if (this.mode === 'self') {
+    clearInterval(this.interval);
 
-    this.generateFinalSelfAssessmentResult();
+    this.interviewCompleted = true;
 
-  }
+    console.log('🏁 Interview Finished');
 
-  this.interviewCompleted = true;
+    if (this.mode === 'self') {
 
-  // -----------------------------------------
-  // Stop interview recording
-  // Upload starts automatically from
-  // videoRecorder.onstop
-  // -----------------------------------------
+      this.generateFinalSelfAssessmentResult();
 
-  if (
-    this.videoRecorder &&
-    this.videoRecorder.state === 'recording'
-  ) {
+    }
 
-    console.log(
-      '⏹ Stopping Interview Recording...'
-    );
+    if (
+        this.mode === 'scheduled' &&
+        this.videoRecorder &&
+        this.videoRecorder.state === 'recording'
+    ) {
 
-    this.videoRecorder.stop();
+        this.videoRecorder.stop();
 
-  }
+    }
 
-  // -----------------------------------------
-  // Close WebSocket
-  // -----------------------------------------
+    if (this.socket) {
 
-  if (this.socket) {
+        this.socket.close();
 
-    this.socket.close();
+    }
+
+    this.stopAllStreams();
+
+    console.log('✅ Interview Cleanup Completed');
 
   }
-
-  // -----------------------------------------
-  // Stop Camera & Microphone
-  // -----------------------------------------
-
-  this.stopAllStreams();
-
-  console.log(
-    '✅ Interview Cleanup Completed'
-  );
-
-}
 
   uploadFinalVideo() {
 
@@ -1048,7 +1034,7 @@ selectMode(choice: 'self' | 'scheduled') {
 
 fetchLatestInterviewHandshake() {
   // 💡 QUICK FIX: Query using email so the backend can link your candidate table rows together!
-  this.http.get<any>(`https://ai-exam-backend-code-production.up.railway.app/api/interviews/latest?email=${this.candidateEmail}`)
+  this.http.get<any>(`${environment.apiBaseUrl}/api/interviews/latest?email=${this.candidateEmail}`)
     .subscribe({
       next: (res: any) => {
         if (res.success && res.data?.interview) {
@@ -1084,7 +1070,7 @@ loadQuestionsForSelectedCourse() {
 
   console.log(`📡 Fetching question inventory for Candidate ID: ${this.candidateId}, Course: ${this.selectedCourse}`);
 
-  this.http.get<any>(`https://ai-exam-backend-code-production.up.railway.app/api/get-questions-by-candidate/${this.candidateId}?selected_course=${this.selectedCourse}`)
+  this.http.get<any>(`${environment.apiBaseUrl}/api/get-questions-by-candidate/${this.candidateId}?selected_course=${this.selectedCourse}`)
     .subscribe({
       next: (qRes: any) => {
         if (qRes.success && qRes.questions && qRes.questions.length > 0) {
@@ -1236,6 +1222,7 @@ generateFinalSelfAssessmentResult() {
 }
 
 finalMarks: number = 0;
+overallMarks: number = 0;
 
 finalResponse: any = {
   strengths: [],
@@ -1263,6 +1250,9 @@ loadFinalSelfAssessmentResult() {
 
       this.finalMarks =
         res.result.final_marks;
+
+      this.overallMarks =
+        res.result.maximum_marks;
 
       this.completedCourse =
         res.result.course;
