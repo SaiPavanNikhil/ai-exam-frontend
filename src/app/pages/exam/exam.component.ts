@@ -294,8 +294,7 @@ startInterview() {
   });
 
   return;
-}
-}
+}}
 
 /**
  * Helper function to cleanly trigger webcam layouts, clocks, and websockets 
