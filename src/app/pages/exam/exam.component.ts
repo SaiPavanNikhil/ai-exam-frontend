@@ -222,11 +222,14 @@ startInterview() {
       this.interviewId =
         `SELF-PRACTICE-${Date.now()}`;
     }
+    
 
     this.launchHardwareAndMediaPipelines();
 
     return;
   }
+
+  
 
   // =====================================================
   // SCHEDULED ASSESSMENT
@@ -291,6 +294,7 @@ startInterview() {
   });
 
   return;
+}
 }
 
 /**
