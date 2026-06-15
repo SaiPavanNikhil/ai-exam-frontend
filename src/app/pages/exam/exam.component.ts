@@ -307,7 +307,7 @@ async launchHardwareAndMediaPipelines() {
 
   this.startVideoRecording();
   this.initWebSocket();
-  this.startAudioStreaming();
+  // this.startAudioStreaming();
   
   this.loadNextQuestion();
   this.startTimer();
@@ -524,43 +524,56 @@ async launchHardwareAndMediaPipelines() {
 
 }
 
-  initWebSocket() {
+initWebSocket() {
 
-  console.log('🔌 Initializing WebSocket...');
+  console.log("Opening websocket...");
 
-  // this.socket = new WebSocket('ws://127.0.0.1:8000/ws/audio');
-this.socket = new WebSocket(
-  'wss://ai-exam-backend-code-production.up.railway.app/ws/audio'
-);
+  this.socket = new WebSocket(
+    "wss://ai-exam-backend-code-production.up.railway.app/ws/audio"
+  );
+
+  this.socket.binaryType = "arraybuffer";
+
   this.socket.onopen = () => {
-    console.log('✅ WebSocket Connected');
+
+    console.log("✅ WebSocket Connected");
+
+    this.startAudioStreaming();
+
   };
 
   this.socket.onmessage = (event) => {
 
-  const data = JSON.parse(event.data);
+    console.log(event.data);
 
-  this.ngZone.run(() => {
+    const data = JSON.parse(event.data);
 
-    if (data.transcript && !this.isSpeaking) {
+    if (data.transcript) {
 
-      this.answer += ' ' + data.transcript;
+      this.ngZone.run(() => {
 
-      console.log('Transcript Added:', data.transcript);
+        this.answer += " " + data.transcript;
 
-      this.cdr.detectChanges();
+        this.cdr.detectChanges();
+
+      });
+
     }
 
-  });
-};
-
-  this.socket.onerror = (err) => {
-    console.error('❌ WebSocket Error:', err);
   };
 
-  this.socket.onclose = () => {
-    console.log('🔌 WebSocket Closed');
+  this.socket.onerror = (e) => {
+
+    console.error("Websocket error", e);
+
   };
+
+  this.socket.onclose = (e) => {
+
+    console.log("Socket closed", e);
+
+  };
+
 }
 
   startAudioStreaming() {
