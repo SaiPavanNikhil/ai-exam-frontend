@@ -15,14 +15,18 @@ else if (host === '101.0.36.60') {
 else if (host === '172.16.1.48') {
   apiBaseUrl = 'http://172.16.1.48:8081/super-admin-erp';
 }
+// else {
+//   // ✅ Railway backend for production
+//   apiBaseUrl = 'https://ai-exam-backend-code-production.up.railway.app';
+// }
 else {
   // ✅ Railway backend for production
-  apiBaseUrl = 'https://ai-exam-backend-code-production.up.railway.app';
+  apiBaseUrl = 'http://localhost:8000';
 }
 
 export const environment = {
   production: false,
-  apiBaseUrl: apiBaseUrl
+  apiBaseUrl: 'http://localhost:8000'
 };
 // const host = window.location.hostname;
 // console.log("🌐 Running on host:", host);

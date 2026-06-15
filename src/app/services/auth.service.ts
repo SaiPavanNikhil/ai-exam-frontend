@@ -7,7 +7,8 @@ import { Observable } from 'rxjs';
 })
 export class AuthService {
 
-    private baseUrl = 'https://ai-exam-backend-code-production.up.railway.app'; // FastAPI URL
+    // private baseUrl = 'https://ai-exam-backend-code-production.up.railway.app'; // FastAPI URL
+    private baseUrl = 'http://localhost:8000'; // FastAPI URL
 
   constructor(private http: HttpClient) {}
 

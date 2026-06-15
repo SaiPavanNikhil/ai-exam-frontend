@@ -601,3 +601,17 @@
   .step span { display: none; }
   .success-actions { flex-direction: column; width: 100%; max-width: 320px; }
 }
+.dashboard-layout{
+    display:flex;
+    min-height:100vh;
+}
+
+.sidebar{
+    width:280px;
+    flex-shrink:0;
+}
+
+.main-content{
+    flex:1;
+    overflow:auto;
+}

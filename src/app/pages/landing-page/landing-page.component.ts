@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../environments/environment.prod';
 
 @Component({
   selector: 'app-landing-page',
@@ -137,7 +138,7 @@ export class LandingPageComponent implements OnInit, OnDestroy {
       phone: this.loginPassword
     };
 
-    this.http.post<any>('https://ai-exam-backend-code-production.up.railway.app/api/candidate/login', payload)
+    this.http.post<any>(`${environment.apiBaseUrl}/api/candidate/login`, payload)
       .subscribe({
         next: (res: any) => {
           this.loginLoading = false;
