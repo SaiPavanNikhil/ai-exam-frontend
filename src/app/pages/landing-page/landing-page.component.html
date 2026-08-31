@@ -1,0 +1,209 @@
+<!-- landing-page.component.html — FULL PAGE, SINGLE BACKGROUND -->
+
+<div class="full-page">
+
+  <!-- Background layers -->
+  <canvas id="heroCanvas" class="hero-canvas"></canvas>
+  <div class="hero-glow"></div>
+  <div class="hero-grid"></div>
+  <div class="particles-wrap" id="particles"></div>
+  <div class="hero-orb orb1"></div>
+  <div class="hero-orb orb2"></div>
+  <div class="hero-orb orb3"></div>
+
+  <!-- Navbar -->
+  <nav class="hero-nav" [class.scrolled]="isScrolled">
+    <a class="logo" href="#">
+      <div class="logo-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+        </svg>
+      </div>
+      <span class="logo-name">Interview</span>
+    </a>
+  </nav>
+
+  <!-- Main body: Left text + Right card -->
+  <div class="page-body">
+
+    <!-- LEFT: Hero Text -->
+    <div class="hero-content">
+      <h1 class="hero-h1">
+        Transform Interviews
+        <span class="hero-h1-line2"><em>with Online Interviews/<br>
+           Viva for Universities</em></span>
+      </h1>
+
+      <p class="hero-sub">
+        Text-to-speech, speech-to-text, face recognition, and a powerful
+        dashboard—enhanced with intelligent automation for seamless interview
+        management, real-time insights, and comprehensive evaluation.
+      </p>
+
+      <div class="feature-pills">
+        <span class="pill">
+          <svg viewBox="0 0 16 16" fill="none" width="11" height="11"
+               stroke="currentColor" stroke-width="1.8"><polyline points="2 8 6 12 14 4"/></svg>
+          Face Recognition
+        </span>
+        <span class="pill">
+          <svg viewBox="0 0 16 16" fill="none" width="11" height="11"
+               stroke="currentColor" stroke-width="1.8"><polyline points="2 8 6 12 14 4"/></svg>
+          Secure Data Management
+        </span>
+        <span class="pill">
+          <svg viewBox="0 0 16 16" fill="none" width="11" height="11"
+               stroke="currentColor" stroke-width="1.8"><polyline points="2 8 6 12 14 4"/></svg>
+          Text-to-Speech Support
+        </span>
+        <span class="pill">
+          <svg viewBox="0 0 16 16" fill="none" width="11" height="11"
+               stroke="currentColor" stroke-width="1.8"><polyline points="2 8 6 12 14 4"/></svg>
+          Evaluation &amp; Scoring
+        </span>
+      </div>
+    </div>
+
+    <!-- RIGHT: Login Card -->
+    <div class="login-panel">
+      <div class="cu-form-card">
+
+        <!-- Header -->
+        <div class="cu-form-header">
+          <div class="cu-logo-sm">
+            <svg viewBox="0 0 24 24" fill="none" width="20" height="20"
+                 stroke="#1a1150" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+            </svg>
+          </div>
+          <div>
+            <h2 class="cu-form-title">Welcome</h2>
+            <p class="cu-form-sub">Sign in here!!!</p>
+          </div>
+        </div>
+
+        <!-- Role tabs -->
+        <div class="cu-role-tabs">
+          <button class="cu-role-tab"
+                  [class.active]="selectedLoginRole === 'student'"
+                  (click)="fillDemo('student')">
+            <svg viewBox="0 0 16 16" fill="none" width="13" height="13"
+                 stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+              <path d="M8 2l6 3-6 3-6-3 6-3z"/>
+              <path d="M2 8l6 3 6-3"/>
+              <path d="M2 11l6 3 6-3"/>
+            </svg>
+            Candidate
+          </button>
+          <button class="cu-role-tab"
+                  [class.active]="selectedLoginRole === 'others'"
+                  (click)="fillDemo('others')">
+            <svg viewBox="0 0 16 16" fill="none" width="13" height="13"
+                 stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+              <circle cx="8" cy="5" r="2.5"/>
+              <path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/>
+            </svg>
+            Admin / Member
+          </button>
+        </div>
+
+        <!-- Email -->
+        <div class="cu-field">
+          <label class="cu-label">Email Address</label>
+          <div class="cu-input-wrap">
+            <svg class="cu-input-icon" viewBox="0 0 16 16" fill="none"
+                 width="14" height="14" stroke="currentColor" stroke-width="1.4" stroke-linecap="round">
+              <rect x="1" y="3" width="14" height="10" rx="1.5"/>
+              <path d="M1 5l7 5 7-5"/>
+            </svg>
+            <input type="email"
+                   class="cu-input"
+                   [(ngModel)]="loginEmail"
+                   [placeholder]="selectedLoginRole === 'student'
+                     ? 'Enter candidate email'
+                     : 'Enter admin / member email'"
+                   (keyup.enter)="doLogin()" />
+          </div>
+        </div>
+
+        <!-- Password -->
+        <div class="cu-field">
+          <label class="cu-label">Password</label>
+          <div class="cu-input-wrap">
+            <svg class="cu-input-icon" viewBox="0 0 16 16" fill="none"
+                 width="14" height="14" stroke="currentColor" stroke-width="1.4" stroke-linecap="round">
+              <rect x="2" y="7" width="12" height="8" rx="1.5"/>
+              <path d="M5 7V5a3 3 0 016 0v2"/>
+            </svg>
+            <input type="password"
+                   class="cu-input"
+                   [(ngModel)]="loginPassword"
+                   placeholder="••••••••"
+                   (keyup.enter)="doLogin()" />
+          </div>
+        </div>
+
+        <!-- Inline error -->
+        <div class="cu-error" *ngIf="loginError">
+          <svg viewBox="0 0 16 16" fill="none" width="14" height="14"
+               stroke="currentColor" stroke-width="1.8">
+            <circle cx="8" cy="8" r="6"/>
+            <line x1="8" y1="5" x2="8" y2="8"/>
+            <circle cx="8" cy="11" r=".6" fill="currentColor"/>
+          </svg>
+          {{ loginError }}
+        </div>
+
+        <!-- Sign In button -->
+        <button class="cu-btn-login"
+                (click)="doLogin()"
+                [disabled]="loginLoading">
+
+          <ng-container *ngIf="!loginLoading">
+            <svg viewBox="0 0 16 16" fill="none" width="14" height="14"
+                 stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+              <path d="M10 2h3a1 1 0 011 1v10a1 1 0 01-1 1h-3"/>
+              <polyline points="7 11 10 8 7 5"/>
+              <line x1="10" y1="8" x2="2" y2="8"/>
+            </svg>
+            Sign In
+          </ng-container>
+
+          <ng-container *ngIf="loginLoading">
+            <span class="spinner"></span>
+            Signing in…
+          </ng-container>
+        </button>
+
+        <div class="cu-divider"><span>or</span></div>
+        <p class="cu-switch-txt">
+          Don't have an account?
+          <button class="cu-switch-link" (click)="openModal('register')">Create one</button>
+        </p>
+
+      </div><!-- /cu-form-card -->
+
+      <div class="cu-security-badges">
+        <span class="cu-badge-item">
+          <svg viewBox="0 0 12 12" fill="none" width="10" height="10"
+               stroke="currentColor" stroke-width="1.5">
+            <rect x="1" y="5" width="10" height="6" rx="1"/>
+            <path d="M3 5V3.5a3 3 0 016 0V5"/>
+          </svg>
+          Enterprise Security
+        </span>
+        <span class="cu-badge-item">
+          <svg viewBox="0 0 12 12" fill="none" width="10" height="10"
+               stroke="currentColor" stroke-width="1.5">
+            <polyline points="2 6 5 9 10 3"/>
+          </svg>
+          GDPR Compliant
+        </span>
+      </div>
+
+    </div><!-- /login-panel -->
+
+  </div><!-- /page-body -->
+
+</div><!-- /full-page -->

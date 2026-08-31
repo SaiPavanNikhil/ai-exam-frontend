@@ -1,0 +1,1317 @@
+<!-- ========================================================= -->
+<!-- SCHEDULE INTERVIEW -->
+<!-- ========================================================= -->
+
+
+<div class="dashboard-layout">
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+
+    <ng-container *ngIf="!showAllInterviews">
+
+      <!-- ===================== TOP BAR ====================== -->
+
+      <div class="topbar">
+        <div class="topbar-left">
+          <h1 class="page-title">Schedule Interview</h1>
+          <span class="breadcrumb">
+            Dashboard / Schedule Interview
+          </span>
+        </div>
+
+        <div class="topbar-right">
+          <div class="step-badge">
+            Step {{currentStep}} of 3
+          </div>
+        </div>
+      </div>
+
+      <!-- ===================== PROGRESS ====================== -->
+
+      <div class="progress-steps">
+
+        <div
+          class="step"
+          [class.active]="currentStep==1"
+          [class.completed]="currentStep>1">
+
+          <div class="step-circle">
+
+            <span *ngIf="currentStep<=1">1</span>
+
+            <svg *ngIf="currentStep>1"
+                 viewBox="0 0 24 24"
+                 fill="none">
+
+              <path
+                d="M5 13l4 4L19 7"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"/>
+
+            </svg>
+
+          </div>
+
+          <span>Interview Setup</span>
+
+        </div>
+
+        <div
+          class="step-line"
+          [class.filled]="currentStep>1">
+        </div>
+
+        <div
+          class="step-line"
+          [class.filled]="currentStep>2">
+        </div>
+
+        <div
+          class="step"
+          [class.active]="currentStep==3">
+
+          <div class="step-circle">
+            2
+          </div>
+
+          <span>Schedule</span>
+
+        </div>
+
+      </div>
+
+
+
+      <!-- ==================================================== -->
+      <!-- STEP 1 -->
+      <!-- ==================================================== -->
+
+      <div
+        class="form-scroll"
+        *ngIf="currentStep==1">
+
+        <!-- INTERVIEW DETAILS -->
+        <div class="interview-details-grid">
+
+          <!-- INTERVIEW NAME -->
+
+          <div class="form-group">
+
+            <label class="form-label">
+              Interview Name
+              <span class="req">*</span>
+            </label>
+
+            <input
+              type="text"
+              class="form-input"
+              placeholder="Enter Interview Name"
+              [(ngModel)]="interviewName">
+
+          </div>
+
+          <!-- COURSE -->
+
+          <div class="form-group">
+
+            <label class="form-label">
+              Course
+              <span class="req">*</span>
+            </label>
+
+            <select
+              class="form-select"
+              [(ngModel)]="selectedCourseId"
+              (change)="onCourseChange()">
+
+              <option [ngValue]="null">
+                -- Select Course --
+              </option>
+
+              <option
+                *ngFor="let course of courses"
+                [ngValue]="course.course_id">
+
+                {{ course.course_name }} - {{ course.branch_name }}
+
+              </option>
+
+            </select>
+
+          </div>
+
+          <!-- SUBJECT -->
+
+          <div class="form-group">
+
+            <label class="form-label">
+              Subject
+              <span class="optional">(Optional)</span>
+            </label>
+
+            <select
+              class="form-select"
+              [(ngModel)]="selectedSubjectId">
+
+              <option [ngValue]="null">
+                -- Interview (No Subject) --
+              </option>
+
+              <option
+                *ngFor="let subject of subjects"
+                [ngValue]="subject.subject_id">
+
+                {{ subject.subject_code }} - {{ subject.subject_name }}
+                ({{ subject.semester_name }})
+
+              </option>
+
+            </select>
+
+          </div>
+
+          <!-- INTERVIEW DATE -->
+
+          <div class="form-group">
+
+            <label class="form-label">
+              Interview Date
+              <span class="req">*</span>
+            </label>
+
+            <input
+              type="date"
+              class="form-input"
+              [(ngModel)]="interviewDate"
+              [min]="todayDate">
+
+          </div>
+
+          <!-- START TIME -->
+
+          <div class="form-group">
+
+            <label class="form-label">
+              Start Time
+              <span class="req">*</span>
+            </label>
+
+            <input
+              type="time"
+              class="form-input"
+              [(ngModel)]="startTime">
+
+          </div>
+
+          <!-- END TIME -->
+
+          <div class="form-group">
+
+            <label class="form-label">
+              End Time
+              <span class="req">*</span>
+            </label>
+
+            <input
+              type="time"
+              class="form-input"
+              [(ngModel)]="endTime">
+
+          </div>
+
+          <!-- NUMBER OF STUDENTS (informational target only) -->
+
+          <div class="form-group">
+
+            <label class="form-label">
+              Target No. of Students
+              <span class="optional">(Optional)</span>
+            </label>
+
+            <input
+              type="number"
+              class="form-input"
+              min="1"
+              placeholder="e.g. 5"
+              [(ngModel)]="studentCount">
+
+          </div>
+
+        </div>
+
+        <!-- ===================================================== -->
+        <!-- STUDENT SELECTION -->
+        <!-- ===================================================== -->
+
+        <div class="student-selection-card" *ngIf="candidates.length">
+
+          <div class="student-selection-header">
+            <div>
+              <h4>Select Students</h4>
+              <small>{{ selectedCandidates.length }} of {{ candidates.length }} selected</small>
+            </div>
+
+            <div class="student-selection-actions">
+              <button
+                type="button"
+                class="btn-link-action"
+                (click)="selectAllCandidates()"
+                [disabled]="allCandidatesSelected">
+                Select All
+              </button>
+              <span class="action-divider">|</span>
+              <button
+                type="button"
+                class="btn-link-action"
+                (click)="clearAllCandidates()"
+                [disabled]="selectedCandidates.length === 0">
+                Clear All
+              </button>
+            </div>
+          </div>
+
+          <div class="student-scroll-list">
+            <label
+              class="student-item"
+              [class.selected]="isCandidateSelected(candidate.id)"
+              *ngFor="let candidate of candidates">
+
+              <input
+                type="checkbox"
+                [checked]="isCandidateSelected(candidate.id)"
+                (change)="toggleCandidate(candidate, $event)">
+
+              <div class="student-avatar">{{ getInitials(candidate.name) }}</div>
+
+              <div class="student-info">
+                <div class="student-name">
+                  {{ candidate.name }}
+                  <span class="student-email-inline" *ngIf="candidate.email">{{ candidate.email }}</span>
+                </div>
+              </div>
+
+              <span class="student-semester-chip" *ngIf="candidate.semester">
+                Sem {{ candidate.semester }}
+              </span>
+
+            </label>
+          </div>
+
+        </div>
+
+        <!-- ===================================================== -->
+        <!-- INTERVIEW COMMITTEE -->
+        <!-- ===================================================== -->
+
+        <div class="card">
+
+          <div class="card-header">
+
+            <div class="card-icon orange">
+              👥
+            </div>
+
+            <div>
+
+              <h3 class="card-title">
+                Interview Committee
+              </h3>
+
+              <p class="card-sub">
+                Assign an existing panel or create a new interview panel.
+              </p>
+
+            </div>
+
+          </div>
+
+          <div class="card-body">
+
+            <!-- ===================================== -->
+            <!-- PANEL MODE -->
+            <!-- ===================================== -->
+
+            <div class="form-group">
+
+              <label class="form-label">
+
+                Panel Selection
+
+              </label>
+
+              <div class="panel-mode">
+
+                <label class="panel-radio">
+
+                  <input
+                    type="radio"
+                    name="panelMode"
+                    value="existing"
+                    [(ngModel)]="panelMode">
+
+                  <span>Use Existing Panel</span>
+
+                </label>
+
+                <label class="panel-radio">
+
+                  <input
+                    type="radio"
+                    name="panelMode"
+                    value="new"
+                    [(ngModel)]="panelMode">
+
+                  <span>Create New Panel</span>
+
+                </label>
+
+              </div>
+
+            </div>
+
+            <!-- ================================================= -->
+            <!-- EXISTING PANEL -->
+            <!-- ================================================= -->
+
+            <div *ngIf="panelMode=='existing'">
+
+              <div class="form-group">
+
+                <label class="form-label">
+
+                  Existing Panel
+
+                </label>
+
+                <select
+                  class="form-select"
+                  [(ngModel)]="selectedPanelId"
+                  (change)="onExistingPanelChange()">
+
+                  <option [ngValue]="null">
+
+                    Select Panel
+
+                  </option>
+
+                  <option
+                    *ngFor="let panel of existingPanels"
+                    [ngValue]="panel.id">
+
+                    {{ panel.panel_name }}
+
+                  </option>
+
+                </select>
+
+              </div>
+
+              <!-- Existing Panel Members -->
+
+              <div
+                class="selected-members-card"
+                *ngIf="existingPanelMembers.length">
+
+                <div class="selected-members-title">
+
+                  Panel Members
+
+                </div>
+
+                <div
+                  class="member-row"
+                  *ngFor="let member of existingPanelMembers"
+                  [class.chairman-row]="member.id==existingChairmanId">
+
+                  <div class="member-info">
+
+                    <div class="member-name">
+
+                      {{member.name}}
+
+                    </div>
+
+                    <div class="member-designation">
+
+                      {{member.designation}}
+
+                    </div>
+
+                  </div>
+
+                  <span
+                    class="chairman-badge"
+                    *ngIf="member.id==existingChairmanId">
+
+                    Chairman
+
+                  </span>
+
+                </div>
+
+              </div>
+
+            </div>
+
+            <!-- ================================================= -->
+            <!-- NEW PANEL -->
+            <!-- ================================================= -->
+
+            <div *ngIf="panelMode=='new'">
+
+              <div class="form-grid">
+
+                <div class="form-group">
+
+                  <label class="form-label">
+
+                    Panel Name
+
+                  </label>
+
+                  <input
+                    class="form-input"
+                    placeholder="Technical Interview Panel"
+                    [(ngModel)]="newPanelName">
+
+                </div>
+
+                <div class="form-group">
+
+                  <label class="form-label">
+
+                    Add Member
+
+                  </label>
+
+                  <select
+                    class="form-select"
+                    (change)="addMember($event)">
+
+                    <option value="">
+
+                      Select Member
+
+                    </option>
+
+                    <option
+                      *ngFor="let member of availableMembers"
+                      [value]="member.id"
+                      [disabled]="isMemberSelected(member.id)">
+
+                      {{member.name}}
+
+                    </option>
+
+                  </select>
+
+                </div>
+
+              </div>
+
+              <!-- Selected Members -->
+
+              <div
+                class="selected-members-card"
+                *ngIf="selectedMembers.length">
+
+                <div class="selected-members-title">
+
+                  Selected Members
+
+                </div>
+
+                <div
+                  class="member-row"
+                  *ngFor="let member of selectedMembers"
+                  [class.chairman-row]="chairmanUserId==member.id">
+
+                  <div class="member-info">
+
+                    <div class="member-name">
+
+                      {{member.name}}
+
+                    </div>
+
+                    <div class="member-designation">
+
+                      {{member.designation}}
+
+                    </div>
+
+                  </div>
+
+                  <div class="member-actions">
+
+                    <span
+                      class="chairman-badge"
+                      *ngIf="chairmanUserId==member.id">
+
+                      Chairman
+
+                    </span>
+
+                    <button
+                      type="button"
+                      class="btn-outline-small"
+                      *ngIf="chairmanUserId!=member.id"
+                      (click)="setChairman(member.id)">
+
+                      Make Chairman
+
+                    </button>
+
+                    <button
+                      type="button"
+                      class="btn-remove-member"
+                      (click)="removeMember(member.id)">
+
+                      ✕
+                    </button>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+
+        <!-- FOOTER -->
+
+        <div class="form-footer">
+
+          <button
+            class="btn-secondary">
+
+            Cancel
+
+          </button>
+
+          <button
+            class="btn-primary"
+            (click)="nextStep()"
+            [disabled]="!canProceedStep1()">
+
+            Next
+
+          </button>
+
+        </div>
+
+      </div>
+
+
+
+      <!-- ===================================================== -->
+      <!-- STEP 3 : FINAL REVIEW -->
+      <!-- ===================================================== -->
+
+      <div
+        class="form-scroll"
+        *ngIf="currentStep==3">
+
+        <div class="card summary-card">
+
+          <div class="card-header">
+
+            <div class="card-icon teal">
+
+              ✓
+
+            </div>
+
+            <div>
+
+              <h3 class="card-title">
+
+                Final Review
+
+              </h3>
+
+              <p class="card-sub">
+
+                Verify everything before scheduling the interview.
+
+              </p>
+
+            </div>
+
+          </div>
+
+          <div class="card-body">
+
+            <div class="final-review-grid">
+
+              <!-- Students / Course -->
+
+              <div class="review-section">
+
+                <div class="review-section-title">
+
+                  Students
+
+                </div>
+
+                <div class="review-row">
+
+                  <span class="review-label">
+                    Students Selected
+                  </span>
+
+                  <span class="review-val">
+                    {{ selectedCandidates.length }}
+                  </span>
+
+                </div>
+
+                <div class="review-row" *ngIf="studentCount">
+
+                  <span class="review-label">
+                    Target
+                  </span>
+
+                  <span class="review-val">
+                    {{ studentCount }}
+                  </span>
+
+                </div>
+
+                <div class="review-row">
+
+                  <span class="review-label">
+                    Course
+                  </span>
+
+                  <span class="review-val">
+                    {{ getSelectedCourseName() }}
+                  </span>
+
+                </div>
+
+                <div class="review-row">
+
+                  <span class="review-label">
+                    Subject
+                  </span>
+
+                  <span class="review-val">
+                    {{ getSelectedSubjectName() || 'Not Selected' }}
+                  </span>
+
+                </div>
+
+                <div class="success-detail-row">
+
+                  <span class="success-detail-label">
+
+                    Students
+
+                  </span>
+
+                  <div class="success-detail-val">
+
+                    <div
+                      class="student-chip"
+                      *ngFor="let student of selectedCandidates">
+
+                      {{ student.name }}
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+              <!-- Interview -->
+
+              <div class="review-section">
+
+                <div class="review-section-title">
+
+                  Interview
+
+                </div>
+
+                <div class="review-row">
+
+                  <span class="review-label">
+
+                    Interview ID
+
+                  </span>
+
+                  <span class="review-val id-badge">
+
+                    {{generatedInterviewId}}
+
+                  </span>
+
+                </div>
+
+                <div class="review-row">
+
+                  <span class="review-label">
+
+                    Date
+
+                  </span>
+
+                  <span class="review-val">
+
+                    {{interviewDate}}
+
+                  </span>
+
+                </div>
+
+                <div class="review-row">
+
+                  <span class="review-label">
+
+                    Time
+
+                  </span>
+
+                  <span class="review-val">
+
+                    {{startTime}} - {{endTime}}
+
+                  </span>
+
+                </div>
+
+                <div class="success-detail-row">
+
+                  <span class="success-detail-label">
+
+                    Interview Name
+
+                  </span>
+
+                  <span class="success-detail-val">
+
+                    {{ interviewName }}
+
+                  </span>
+
+                </div>
+
+                <div class="review-row">
+
+                  <span class="review-label">
+
+                    Status
+
+                  </span>
+
+                  <span class="review-val">
+
+                    Scheduled
+
+                  </span>
+
+                </div>
+
+              </div>
+
+              <!-- Panel -->
+
+              <div class="review-section">
+
+                <div class="review-section-title">
+
+                  Panel
+
+                </div>
+
+                <div class="review-row">
+
+                  <span class="review-label">
+
+                    Panel
+
+                  </span>
+
+                  <span class="review-val">
+
+                    {{panelAssigned}}
+
+                  </span>
+
+                </div>
+
+                <div class="review-row">
+
+                  <span class="review-label">
+
+                    Chairman
+
+                  </span>
+
+                  <span class="review-val">
+
+                    {{getChairmanName()}}
+
+                  </span>
+
+                </div>
+
+                <div class="review-row">
+
+                  <span class="review-label">
+
+                    Members
+
+                  </span>
+
+                  <span class="review-val">
+
+                    {{selectedMembers.length}}
+
+                  </span>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- API ERROR -->
+
+        <div
+          *ngIf="apiError"
+          style="
+            margin-bottom:20px;
+            padding:15px;
+            background:#fef2f2;
+            border:1px solid #fecaca;
+            color:#dc2626;
+            border-radius:8px;">
+
+          {{apiError}}
+
+        </div>
+
+        <!-- Footer -->
+
+        <div class="form-footer">
+
+          <button
+            class="btn-secondary"
+            (click)="goToStep(1)">
+
+            Back
+
+          </button>
+
+          <button
+            class="btn-schedule"
+            (click)="scheduleInterview()"
+            [disabled]="isLoading">
+
+            <svg
+              *ngIf="!isLoading"
+              viewBox="0 0 24 24"
+              fill="none">
+
+              <rect
+                x="3"
+                y="4"
+                width="18"
+                height="18"
+                rx="2"
+                stroke="currentColor"
+                stroke-width="2"/>
+
+              <path
+                d="M8 14l3 3 5-5"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"/>
+
+            </svg>
+
+            <span *ngIf="!isLoading">
+
+              Schedule Interview
+
+            </span>
+
+            <span *ngIf="isLoading">
+
+              Scheduling...
+
+            </span>
+
+          </button>
+
+        </div>
+
+      </div>
+
+      <!-- ===================================================== -->
+      <!-- SUCCESS PAGE -->
+      <!-- ===================================================== -->
+
+      <div
+        class="form-scroll"
+        *ngIf="currentStep==4">
+
+        <div class="success-screen">
+
+          <div class="success-icon-wrap">
+
+            <svg
+              viewBox="0 0 80 80"
+              fill="none">
+
+              <circle
+                cx="40"
+                cy="40"
+                r="40"
+                fill="#dcfce7"/>
+
+              <circle
+                cx="40"
+                cy="40"
+                r="30"
+                fill="#16a34a"/>
+
+              <path
+                d="M26 41l10 10 18-18"
+                stroke="#fff"
+                stroke-width="4"
+                stroke-linecap="round"
+                stroke-linejoin="round"/>
+
+            </svg>
+
+          </div>
+
+          <h2 class="success-title">
+
+            Interview Scheduled Successfully
+
+          </h2>
+
+          <p class="success-sub">
+
+            The interview has been successfully scheduled.
+
+          </p>
+
+          <div class="success-detail-card">
+
+            <div class="success-detail-row">
+
+              <span class="success-detail-label">
+
+                Interview ID
+
+              </span>
+
+              <span class="success-detail-val id-badge">
+
+                {{generatedInterviewId}}
+
+              </span>
+
+            </div>
+
+            <div class="success-detail-row">
+
+              <span class="success-detail-label">
+
+                Interview Name
+
+              </span>
+
+              <span class="success-detail-val">
+
+                {{ interviewName }}
+
+              </span>
+
+            </div>
+
+            <div class="success-detail-row">
+
+              <span class="success-detail-label">
+
+                Students
+
+              </span>
+
+              <div class="success-detail-val">
+
+                <div
+                  class="student-chip"
+                  *ngFor="let student of selectedCandidates">
+
+                  {{ student.name }}
+
+                </div>
+
+              </div>
+
+            </div>
+
+            <div class="success-detail-row">
+
+              <span class="success-detail-label">
+
+                Total Students
+
+              </span>
+
+              <span class="success-detail-val">
+
+                {{selectedCandidates.length}}
+
+              </span>
+
+            </div>
+
+            <div class="success-detail-row">
+
+              <span class="success-detail-label">
+
+                Course
+
+              </span>
+
+              <span class="success-detail-val">
+
+                {{ getSelectedCourseName() }}
+
+              </span>
+
+            </div>
+
+            <div class="success-detail-row">
+
+              <span class="success-detail-label">
+
+                Panel
+
+              </span>
+
+              <span class="success-detail-val">
+
+                {{panelAssigned}}
+
+              </span>
+
+            </div>
+
+            <div class="success-detail-row">
+
+              <span class="success-detail-label">
+
+                Chairman
+
+              </span>
+
+              <span class="success-detail-val">
+
+                {{getChairmanName()}}
+
+              </span>
+
+            </div>
+
+            <div class="success-detail-row">
+
+              <span class="success-detail-label">
+
+                Date
+
+              </span>
+
+              <span class="success-detail-val">
+
+                {{interviewDate}}
+
+              </span>
+
+            </div>
+
+            <div class="success-detail-row">
+
+              <span class="success-detail-label">
+
+                Time
+
+              </span>
+
+              <span class="success-detail-val">
+
+                {{startTime}} - {{endTime}}
+
+              </span>
+
+            </div>
+
+          </div>
+
+          <div class="success-actions">
+
+            <button
+              class="btn-secondary"
+              (click)="resetForm()">
+
+              Schedule Another
+
+            </button>
+
+            <button
+              class="btn-primary"
+              (click)="openAllInterviews()">
+
+              View All Interviews
+
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </ng-container>
+
+
+    <!-- ================================================= -->
+    <!-- SELECTED STUDENTS MODAL -->
+    <!-- ================================================= -->
+
+    <div
+      class="modal-overlay"
+      *ngIf="showSelectedStudentsModal">
+
+      <div class="student-modal">
+
+        <div class="modal-header">
+
+          <h3>
+
+            Selected Students
+
+          </h3>
+
+          <button
+            class="modal-close"
+            (click)="closeSelectedCandidatesModal()">
+
+            ✕
+
+          </button>
+
+        </div>
+
+        <div class="modal-count">
+
+          {{ selectedCandidates.length }} Students Selected
+
+        </div>
+
+        <div class="modal-table-wrapper">
+
+          <table class="student-table">
+
+            <thead>
+
+              <tr>
+
+                <th>#</th>
+
+                <th>Name</th>
+
+                <th>Email</th>
+
+                <th>Semester</th>
+
+                <th>Action</th>
+
+              </tr>
+
+            </thead>
+
+            <tbody>
+
+              <tr *ngFor="let student of selectedCandidates; let i=index">
+
+                <td>{{i+1}}</td>
+
+                <td>{{student.name}}</td>
+
+                <td>{{student.email}}</td>
+
+                <td>{{student.semester}}</td>
+
+                <td>
+
+                  <button
+                    class="btn-remove"
+                    (click)="removeCandidate(student.id)">
+
+                    Remove
+
+                  </button>
+
+                </td>
+
+              </tr>
+
+              <tr *ngIf="selectedCandidates.length===0">
+
+                <td colspan="5">
+
+                  No students selected.
+
+                </td>
+
+              </tr>
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+        <div class="modal-footer">
+
+          <button
+            class="btn-secondary"
+            (click)="closeSelectedCandidatesModal()">
+
+            Close
+
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+</div>

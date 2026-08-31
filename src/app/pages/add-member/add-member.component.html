@@ -1,0 +1,107 @@
+<main class="main-content">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1 class="page-title">Add Member</h1>
+      <span class="breadcrumb">Dashboard / Add Member</span>
+    </div>
+    <div class="topbar-right">
+      <button class="btn-secondary" (click)="goBack()">
+        <svg viewBox="0 0 24 24" fill="none" width="15" height="15" stroke="currentColor" stroke-width="2">
+          <path d="M19 12H5M12 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Back to Schedule
+      </button>
+    </div>
+  </div>
+
+  <div class="form-scroll">
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon purple">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            <circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="1.8"/>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div>
+          <h3 class="card-title">New Interview Committee Member</h3>
+          <p class="card-sub">Add a member who can be assigned to interview panels</p>
+        </div>
+      </div>
+
+      <div class="card-body">
+        <form #memberForm="ngForm" (ngSubmit)="onSubmit(memberForm)">
+
+          <div class="form-grid">
+
+            <div class="form-group">
+              <label class="form-label">Name <span class="req">*</span></label>
+              <input type="text" class="form-input" name="name"
+                     [(ngModel)]="member.name" required #name="ngModel"
+                     placeholder="Full name" />
+              <span class="field-error" *ngIf="name.invalid && name.touched">Required</span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Email <span class="req">*</span></label>
+              <input type="email" class="form-input" name="email"
+                     [(ngModel)]="member.email" required email #email="ngModel"
+                     placeholder="name@example.com" />
+              <span class="field-error" *ngIf="email.invalid && email.touched">Invalid email</span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Password <span class="req">*</span></label>
+              <input type="password" class="form-input" name="password"
+                     [(ngModel)]="member.password" required minlength="6" #password="ngModel"
+                     placeholder="Min 6 characters" />
+              <span class="field-error" *ngIf="password.invalid && password.touched">Min 6 characters</span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Designation <span class="req">*</span></label>
+              <input type="text" class="form-input" name="designation"
+                     [(ngModel)]="member.designation" required #designation="ngModel"
+                     placeholder="e.g. Assistant Professor" />
+              <span class="field-error" *ngIf="designation.invalid && designation.touched">Required</span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Member Type <span class="req">*</span></label>
+              <select class="form-select" name="memberType"
+                      [(ngModel)]="member.memberType" required #memberType="ngModel">
+                <option value="" disabled>-- Select --</option>
+                <option value="Internal">Internal</option>
+                <option value="External">External</option>
+              </select>
+              <span class="field-error" *ngIf="memberType.invalid && memberType.touched">Required</span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Role</label>
+              <select class="form-select" name="role" [(ngModel)]="member.role">
+                <option value="member">Member</option>
+              </select>
+            </div>
+
+          </div>
+
+          <div class="form-footer-inline">
+            <button type="submit" class="btn-primary" [disabled]="memberForm.invalid">
+              <svg viewBox="0 0 24 24" fill="none" width="15" height="15" stroke="currentColor" stroke-width="2">
+                <path d="M12 5v14M5 12h14" stroke-linecap="round"/>
+              </svg>
+              Add Member
+            </button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+
+  </div>
+</main>

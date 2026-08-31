@@ -1,0 +1,247 @@
+/* ==========================================================================
+   GLOBAL CONFIGURATION & CONTAINERS
+   ========================================================================== */
+.container {
+  max-width: 1050px;
+  margin: 0 auto;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* Base utility for smooth section loading adjustments */
+.animate-fade-in {
+  animation: tableFadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes tableFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==========================================================================
+   CARDS & WRAPPERS
+   ========================================================================== */
+.card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* ==========================================================================
+   FORM INPUTS & DROPDOWN MATRIX CONTROLS
+   ========================================================================== */
+.form-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.form-select {
+  width: 100%;
+  padding: 12px 14px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #1e293b;
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  box-sizing: border-box;
+}
+
+.form-select:focus {
+  border-color: #059669; /* Dynamic success accent focus color link */
+  outline: 0;
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.12);
+}
+
+/* ==========================================================================
+   EXCEL DRAG & DROP AREA OVERLAYS
+   ========================================================================== */
+.file-drop-zone {
+  position: relative;
+  overflow: hidden; /* Restricts raw file pointer visibility leaking outside bounds */
+  border: 2px dashed #cbd5e1 !important;
+  background-color: #f8fafc;
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease-in-out;
+}
+
+.file-drop-zone:hover {
+  border-color: #10b981 !important;
+  background-color: #f0fdf4;
+}
+
+/* Perfectly map file pointer box parameters without overlaying menu logic selectors */
+.file-input-field {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 5;
+}
+
+/* Disabled file dropper behavior validation rules */
+.file-input-field:disabled {
+  cursor: not-allowed;
+}
+.file-drop-zone:has(input:disabled) {
+  opacity: 0.6;
+  background-color: #f1f5f9;
+  border-color: #e2e8f0 !important;
+}
+
+/* ==========================================================================
+   DYNAMIC RE-MADE PARSED DATA TABLE LAYOUT
+   ========================================================================== */
+.table-wrapper {
+  background: #ffffff;
+  box-shadow: inset 0 1px 3.5px rgba(0, 0, 0, 0.04);
+  border-color: #e2e8f0 !important;
+}
+
+/* Force sticky header boundary behaviors during table data parsing viewport rows */
+.sticky-top {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.table th {
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  font-size: 0.775rem;
+  padding: 12px 16px;
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+}
+
+.table td {
+  padding: 12px 16px;
+  color: #334155;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+/* Row shading structures */
+.table-striped tbody tr:nth-of-type(odd) {
+  background-color: #f8fafc;
+}
+
+.table-hover tbody tr:hover {
+  background-color: #f1f5f9;
+}
+
+/* ==========================================================================
+   INTERFACE SYSTEM ACTION ACTION HEADERS
+   ========================================================================== */
+.btn-dark {
+  background-color: #0f172a;
+  color: #ffffff;
+  border: 1px solid #020617;
+  border-radius: 10px;
+}
+
+.btn-dark:hover:not(:disabled) {
+  background-color: #1e293b;
+}
+
+.btn-lg {
+  padding: 14px 32px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed !important;
+}
+
+/* ==========================================================================
+   BANNERS & STATUS TOAST MESSAGES
+   ========================================================================== */
+.alert {
+  padding: 14px 20px;
+  border-radius: 10px;
+  font-size: 0.925rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+}
+
+.alert-success {
+  background-color: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
+.alert-danger {
+  background-color: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fca5a5;
+}
+
+/* ==========================================================================
+   RESPONSIVE LAYOUT MATRIX ADAPTATIONS
+   ========================================================================== */
+@media (max-width: 768px) {
+  .row {
+    flex-direction: column;
+    gap: 15px;
+  }
+  .col-md-4, .col-md-8 {
+    width: 100% !important;
+  }
+  .card .d-flex {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 12px;
+  }
+  .btn-lg {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/* Custom stylings for the raw JSON display panel terminal */
+.json-terminal-output {
+  background: #0f172a;
+  color: #38bdf8 !important; /* Cyber sky-blue console layout text */
+  font-size: 0.825rem;
+  line-height: 1.4;
+  white-space: pre-wrap; 
+  word-wrap: break-word;
+  border-radius: 6px;
+}
+
+/* Custom styling adjustments for file summary headers */
+.architecture-badge {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background-color: #334155 !important;
+  color: #94a3b8 !important;
+}
+
+.text-indigo {
+  color: #4f46e5 !important;
+}

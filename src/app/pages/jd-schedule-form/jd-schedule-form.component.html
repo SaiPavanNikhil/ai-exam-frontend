@@ -1,0 +1,172 @@
+<div class="jd-schedule-form">
+
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">JD Interview Schedule</h2>
+      <div class="breadcrumb">Dashboard / <span class="current">JD Schedule</span></div>
+    </div>
+    <div class="status-badge" *ngIf="showCommittee">Ready to save</div>
+  </div>
+
+  <div *ngIf="loading" class="loading">Loading form data...</div>
+  <div *ngIf="errorMsg" class="error">{{ errorMsg }}</div>
+
+  <div class="panel">
+    <h3 class="panel-heading">Job Description & Eligibility</h3>
+
+    <div class="form-row">
+
+      <div class="form-col">
+        <label>JD Selection</label>
+        <select [(ngModel)]="selectedJdId" class="form-control">
+          <option [ngValue]="null" disabled>Select JD</option>
+          <option *ngFor="let jd of jdList" [ngValue]="jd.id">{{ jd.title }}</option>
+        </select>
+      </div>
+
+      <div class="form-col">
+        <label>Course Selection</label>
+        <select [(ngModel)]="selectedCourseId" class="form-control">
+          <option [ngValue]="null" disabled>Select Course</option>
+          <option *ngFor="let course of courseList" [ngValue]="course.course_id">
+            {{ course.course_name }} ({{ course.course_code }})
+          </option>
+        </select>
+      </div>
+
+      <div class="form-col">
+        <label>Year Selection</label>
+        <select [(ngModel)]="selectedYear" class="form-control">
+          <option value="" disabled>Select Year</option>
+          <option *ngFor="let y of yearList" [value]="y">{{ y }}</option>
+        </select>
+      </div>
+
+      <div class="form-col add-col">
+        <label>&nbsp;</label>
+        <button type="button" class="add-btn" [disabled]="!canAdd" (click)="addEligibilityRow()">
+          + Add
+        </button>
+      </div>
+
+    </div>
+
+    <div class="eligibility-table" *ngIf="eligibilityRows.length > 0">
+      <h3>Eligibility Criteria</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Course</th>
+            <th>Year</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of eligibilityRows; let i = index">
+            <td>{{ row.course_label }}</td>
+            <td>{{ row.year }}</td>
+            <td>
+              <button type="button" class="remove-btn" (click)="removeEligibilityRow(i)">✕</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===================================================== -->
+  <!-- INTERVIEW COMMITTEE (reused from Schedule Interview) -->
+  <!-- ===================================================== -->
+  <div class="card" *ngIf="showCommittee">
+
+    <div class="card-header">
+      <div class="card-icon orange">👥</div>
+      <div>
+        <h3 class="card-title">Interview Committee</h3>
+        <p class="card-sub">Assign an existing panel or create a new interview panel.</p>
+      </div>
+    </div>
+
+    <div class="card-body">
+
+      <div class="form-group">
+        <label class="form-label">Panel Selection</label>
+        <div class="panel-mode">
+          <label class="panel-radio" [class.active]="panelMode == 'existing'">
+            <input type="radio" name="panelMode" value="existing" [(ngModel)]="panelMode">
+            <span>Use Existing Panel</span>
+          </label>
+          <label class="panel-radio" [class.active]="panelMode == 'new'">
+            <input type="radio" name="panelMode" value="new" [(ngModel)]="panelMode">
+            <span>Create New Panel</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- EXISTING PANEL -->
+      <div *ngIf="panelMode == 'existing'">
+        <div class="form-group">
+          <label class="form-label">Existing Panel</label>
+          <select class="form-select" [(ngModel)]="selectedPanelId" (change)="onExistingPanelChange()">
+            <option [ngValue]="null">Select Panel</option>
+            <option *ngFor="let panel of existingPanels" [ngValue]="panel.id">{{ panel.panel_name }}</option>
+          </select>
+        </div>
+
+        <div class="selected-members-card" *ngIf="existingPanelMembers.length">
+          <div class="selected-members-title">Panel Members</div>
+          <div class="member-row" *ngFor="let member of existingPanelMembers" [class.chairman-row]="member.id == existingChairmanId">
+            <div class="member-info">
+              <div class="member-name">{{ member.name }}</div>
+              <div class="member-designation">{{ member.designation }}</div>
+            </div>
+            <span class="chairman-badge" *ngIf="member.id == existingChairmanId">Chairman</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- NEW PANEL -->
+      <div *ngIf="panelMode == 'new'">
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Panel Name</label>
+            <input class="form-input" placeholder="Technical Interview Panel" [(ngModel)]="newPanelName">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Add Member</label>
+            <select class="form-select" (change)="addMember($event)">
+              <option value="">Select Member</option>
+              <option *ngFor="let member of availableMembers" [value]="member.id" [disabled]="isMemberSelected(member.id)">
+                {{ member.name }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <div class="selected-members-card" *ngIf="selectedMembers.length">
+          <div class="selected-members-title">Selected Members</div>
+          <div class="member-row" *ngFor="let member of selectedMembers" [class.chairman-row]="chairmanUserId == member.id">
+            <div class="member-info">
+              <div class="member-name">{{ member.name }}</div>
+              <div class="member-designation">{{ member.designation }}</div>
+            </div>
+            <div class="member-actions">
+              <span class="chairman-badge" *ngIf="chairmanUserId == member.id">Chairman</span>
+              <button type="button" class="btn-outline-small" *ngIf="chairmanUserId != member.id" (click)="setChairman(member.id)">Make Chairman</button>
+              <button type="button" class="btn-remove-member" (click)="removeMember(member.id)">✕</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="actions">
+    <button type="button" class="cancel-btn" (click)="resetForm()">Cancel</button>
+    <button type="button" class="save-btn" [disabled]="!canSave || saving" (click)="onSave()">
+      {{ saving ? 'Saving...' : 'Save' }}
+    </button>
+  </div>
+
+</div>

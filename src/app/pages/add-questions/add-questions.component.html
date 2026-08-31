@@ -1,0 +1,415 @@
+<div class="container my-5">
+
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <button class="btn btn-outline-secondary btn-sm" (click)="goBack()">
+      <i class="bi bi-arrow-left"></i> Back to Schedule
+    </button>
+    <h2 class="mb-0 fw-bold text-dark">Question Bank Provisioning Hub</h2>
+  </div>
+
+  <div *ngIf="statusMessage"
+       class="alert alert-success alert-dismissible fade show border-0 shadow-sm mb-4" role="alert">
+    <i class="bi bi-check-circle-fill me-2"></i> {{ statusMessage }}
+  </div>
+  <div *ngIf="errorMessage"
+       class="alert alert-danger alert-dismissible fade show border-0 shadow-sm mb-4" role="alert">
+    <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ errorMessage }}
+  </div>
+
+  <!-- ── Tab Switcher ─────────────────────────────────────────── -->
+  <div class="card border-0 shadow-sm p-3 mb-4" style="border-radius:12px; background:#f8fafc;">
+    <div class="d-flex align-items-center justify-content-between">
+      <div>
+        <h5 class="mb-1 fw-bold">Choose Provisioning Method</h5>
+        <small class="text-muted">Select how questions should be appended to the course program bank.</small>
+      </div>
+      <div class="btn-group" role="group">
+        <button type="button" class="btn px-4"
+                [ngClass]="activeTab === 'gemini' ? 'btn-primary' : 'btn-light border'"
+                (click)="switchTab('gemini')">
+          <i class="bi bi-cpu-fill me-1"></i> AI Mode
+        </button>
+        <button type="button" class="btn px-4"
+                [ngClass]="activeTab === 'manual' ? 'btn-dark' : 'btn-light border'"
+                (click)="switchTab('manual')">
+          <i class="bi bi-pencil-square me-1"></i> Global Form
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════════ -->
+  <!--  AI / GEMINI TAB                                             -->
+  <!-- ════════════════════════════════════════════════════════════ -->
+  <div *ngIf="activeTab === 'gemini'"
+       class="card border-0 shadow-sm p-4 animate-fade-in" style="border-radius:16px;">
+
+    <div class="mb-4">
+      <h4 class="fw-bold">
+        <i class="bi bi-stars me-2 text-primary"></i>AI Course Syllabus Parsing
+      </h4>
+      <p class="text-muted small">
+        Upload a syllabus PDF. AI will read the content and synthesize distinct
+        situational evaluation questions matched to that course program profile automatically.
+      </p>
+    </div>
+
+    <form #geminiForm="ngForm" (submit)="$event.preventDefault()">
+      <div class="row g-3">
+
+        <!-- ① Course -->
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">
+            <span class="badge bg-primary rounded-pill me-1">1</span> Course Program
+          </label>
+          <div *ngIf="isLoadingCourses" class="text-muted small py-2">
+            <span class="spinner-border spinner-border-sm me-1"></span> Loading courses…
+          </div>
+          <div *ngIf="coursesError" class="text-danger small py-2">{{ coursesError }}</div>
+          <select *ngIf="!isLoadingCourses && !coursesError"
+                  [(ngModel)]="selectedCourseCode"
+                  name="geminiCourse"
+                  class="form-select"
+                  required
+                  (ngModelChange)="onGeminiCourseChange()">
+            <option value="" disabled>-- Select from course_master --</option>
+            <option *ngFor="let c of courses" [value]="c.course_code">
+              {{ c.course_name }} — {{ c.branch_name }}
+            </option>
+          </select>
+        </div>
+
+        <!-- ② All subjects — closed-by-default dropdown picker -->
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">
+            <span class="badge bg-primary rounded-pill me-1">2</span>
+            All Subjects
+            <span *ngIf="subjects.length > 0 && !isLoadingSubjects"
+                  class="badge bg-light text-dark border ms-1">{{ subjects.length }}</span>
+          </label>
+
+          <!-- Loading -->
+          <div *ngIf="isLoadingSubjects" class="text-muted small py-2">
+            <span class="spinner-border spinner-border-sm me-1"></span> Loading subjects…
+          </div>
+
+          <!-- No course selected -->
+          <div *ngIf="!isLoadingSubjects && !selectedCourseCode"
+               class="subject-dropdown-toggle disabled d-flex align-items-center justify-content-between">
+            <span class="text-muted small">Select a course first</span>
+          </div>
+
+          <!-- Dropdown wrapper -->
+          <div *ngIf="!isLoadingSubjects && selectedCourseCode" class="subject-dropdown-wrapper">
+
+            <!-- Toggle / closed display: shows ONLY the selected value -->
+            <div class="subject-dropdown-toggle d-flex align-items-center justify-content-between"
+                 (click)="toggleGeminiSubjectDropdown()">
+
+              <span *ngIf="geminiSelectedSubject" class="subject-row-inline">
+                <span class="subject-code">{{ geminiSelectedSubject.subject_code }}</span>
+                <span class="subject-sep">—</span>
+                <span class="subject-name">{{ geminiSelectedSubject.subject_name }}</span>
+                <span class="subject-sep">|</span>
+                <span class="badge semester-badge">{{ geminiSelectedSubject.semester_name }}</span>
+              </span>
+
+              <span *ngIf="!geminiSelectedSubject" class="text-muted small">
+                -- Select a subject (optional) --
+              </span>
+
+              <i class="bi" [ngClass]="isGeminiSubjectListOpen ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
+            </div>
+
+            <!-- Open list — only visible while picking, closes immediately on selection -->
+            <div *ngIf="isGeminiSubjectListOpen" class="subject-picker subject-picker-overlay">
+              <div *ngIf="subjects.length === 0" class="text-muted small p-3">No subjects found.</div>
+
+              <div *ngFor="let s of subjects"
+                   class="subject-row"
+                   [class.selected]="geminiSelectedSubjectId === s.subject_id"
+                   (click)="toggleGeminiSubject(s.subject_id)">
+                <span class="subject-code">{{ s.subject_code }}</span>
+                <span class="subject-sep">—</span>
+                <span class="subject-name">{{ s.subject_name }}</span>
+                <span class="subject-sep">|</span>
+                <span class="badge semester-badge">{{ s.semester_name }}</span>
+              </div>
+            </div>
+          </div>
+
+          <small *ngIf="subjects.length > 0 && !isLoadingSubjects" class="text-muted mt-2 d-block">
+            <i class="bi bi-info-circle me-1"></i>
+            {{ geminiSelectedSubjectId
+              ? 'Subject selected — click to change. AI will focus on this subject.'
+              : 'Leave unselected to cover all ' + subjects.length + ' subjects.' }}
+          </small>
+          <small *ngIf="selectedCourseCode && !isLoadingSubjects && subjects.length === 0"
+                 class="text-warning mt-2 d-block">
+            <i class="bi bi-exclamation-circle me-1"></i> No subjects mapped to this course.
+          </small>
+        </div>
+
+        <!-- PDF upload -->
+        <div class="col-12">
+          <label class="form-label fw-semibold">Reference Document (PDF Only)</label>
+          <div class="file-drop-zone p-4 border border-dashed rounded-3 text-center bg-light position-relative">
+            <i class="bi bi-file-earmark-pdf-fill text-danger display-5 d-block mb-2"></i>
+            <span class="d-block text-secondary small mb-2" *ngIf="!selectedFile">
+              Drag and drop or click to attach target syllabus PDF
+            </span>
+            <span class="d-block text-success fw-bold small mb-2" *ngIf="selectedFile">
+              ✓ Attached: {{ selectedFile.name }}
+            </span>
+            <input type="file" (change)="onFileSelected($event)"
+                   accept="application/pdf" class="file-input-field" />
+          </div>
+        </div>
+
+        <div class="col-12 text-end mt-2">
+          <button type="button" class="btn btn-primary btn-lg px-5 shadow-sm"
+                  (click)="onGenerate(geminiForm)"
+                  [disabled]="isLoading || !geminiForm.valid || !selectedFile || subjects.length === 0">
+            <span class="spinner-border spinner-border-sm me-2" *ngIf="isLoading"></span>
+            <i class="bi bi-lightning-charge-fill me-1" *ngIf="!isLoading"></i>
+            Generate with Gemini Core
+          </button>
+        </div>
+
+      </div>
+    </form>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════════ -->
+  <!--  MANUAL / GLOBAL FORM TAB — REDESIGNED                        -->
+  <!-- ════════════════════════════════════════════════════════════ -->
+  <div *ngIf="activeTab === 'manual'"
+       class="card border-0 shadow-sm gf-hero animate-fade-in">
+
+    <!-- Hero header -->
+    <div class="gf-hero-header">
+      <div class="gf-hero-icon">
+        <i class="bi bi-stars"></i>
+      </div>
+      <div>
+        <h4 class="fw-bold mb-1">Global AI Question Generation</h4>
+        <p class="text-muted small mb-0">
+          Select the course, semester and subject — Gemini will craft technical interview
+          questions tailored to that subject in seconds.
+        </p>
+      </div>
+    </div>
+
+    <form #manualForm="ngForm" (submit)="$event.preventDefault()" class="gf-form">
+
+      <!-- Step flow -->
+      <div class="gf-step-flow">
+
+        <!-- Course -->
+        <div class="gf-step">
+          <div class="gf-step-label">
+            <span class="gf-step-num">1</span>
+            <span>Course Program</span>
+          </div>
+
+          <div *ngIf="isLoadingCourses" class="text-muted small py-2">
+            <span class="spinner-border spinner-border-sm me-1"></span>
+            Loading courses...
+          </div>
+
+          <div *ngIf="coursesError" class="text-danger small py-2">
+            {{ coursesError }}
+          </div>
+
+          <select
+            *ngIf="!isLoadingCourses && !coursesError"
+            [(ngModel)]="manualCourseCode"
+            name="manualCourse"
+            class="form-select gf-select"
+            required
+            (ngModelChange)="onManualCourseChange()">
+
+            <option value="" disabled>-- Select Course --</option>
+            <option *ngFor="let c of courses" [value]="c.course_code">
+              {{ c.course_name }} — {{ c.branch_name }}
+            </option>
+          </select>
+        </div>
+
+        <div class="gf-step-connector"><i class="bi bi-chevron-right"></i></div>
+
+        <!-- Semester -->
+        <div class="gf-step">
+          <div class="gf-step-label">
+            <span class="gf-step-num">2</span>
+            <span>Semester</span>
+          </div>
+
+          <div *ngIf="isLoadingSubjects" class="text-muted small py-2">
+            <span class="spinner-border spinner-border-sm me-1"></span>
+            Loading...
+          </div>
+
+          <select
+            *ngIf="!isLoadingSubjects"
+            [(ngModel)]="manualSemesterId"
+            name="manualSemester"
+            class="form-select gf-select"
+            required
+            [disabled]="!manualCourseCode"
+            (ngModelChange)="onManualSemesterChange()">
+
+            <option [ngValue]="null" disabled>
+              {{ !manualCourseCode ? 'Select course first' : '-- Select Semester --' }}
+            </option>
+            <option *ngFor="let sem of semesterList" [ngValue]="sem.semester_id">
+              {{ sem.semester_name }}
+            </option>
+          </select>
+        </div>
+
+        <div class="gf-step-connector"><i class="bi bi-chevron-right"></i></div>
+
+        <!-- Subject -->
+        <div class="gf-step">
+          <div class="gf-step-label">
+            <span class="gf-step-num">3</span>
+            <span>Subject</span>
+          </div>
+
+          <select
+            [(ngModel)]="manualSubjectId"
+            name="manualSubject"
+            class="form-select gf-select"
+            required
+            [disabled]="!manualSemesterId">
+
+            <option [ngValue]="null" disabled>
+              {{ !manualSemesterId ? 'Select semester first' : '-- Select Subject --' }}
+            </option>
+            <option *ngFor="let s of filteredSubjects" [ngValue]="s.subject_id">
+              {{ s.subject_code }} — {{ s.subject_name }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Question count + Generate action bar -->
+      <div class="gf-action-bar">
+
+        <div class="gf-qty-block">
+          <label class="form-label fw-semibold mb-1">Number of Questions</label>
+          <div class="gf-qty-stepper">
+            <button type="button" class="gf-qty-btn"
+                    (click)="manualQuestionCount = manualQuestionCount > 1 ? manualQuestionCount - 1 : 1">
+              <i class="bi bi-dash"></i>
+            </button>
+            <input
+              type="number"
+              class="gf-qty-input"
+              min="1"
+              max="50"
+              [(ngModel)]="manualQuestionCount"
+              name="manualQuestionCount"
+              required>
+            <button type="button" class="gf-qty-btn"
+                    (click)="manualQuestionCount = manualQuestionCount < 50 ? manualQuestionCount + 1 : 50">
+              <i class="bi bi-plus"></i>
+            </button>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          class="btn gf-generate-btn"
+          (click)="generateGlobalQuestions()"
+          [disabled]="isLoading || !manualCourseCode || !manualSubjectId || !manualQuestionCount">
+
+          <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2"></span>
+          <i *ngIf="!isLoading" class="bi bi-stars me-2"></i>
+          Generate Questions
+        </button>
+      </div>
+
+    </form>
+
+    <!-- ===================================================== -->
+    <!-- GENERATED QUESTIONS (filled after Gemini API call)     -->
+    <!-- ===================================================== -->
+
+    <div class="gf-results" *ngIf="generatedQuestions && generatedQuestions.length">
+
+      <div class="gf-results-header">
+        <div class="d-flex align-items-center gap-2">
+          <div class="gf-results-icon"><i class="bi bi-list-check"></i></div>
+          <div>
+            <h5 class="fw-bold mb-0">Generated Questions</h5>
+            <small class="text-muted">Review, edit or remove before saving to the bank</small>
+          </div>
+        </div>
+        <span class="gf-count-pill">{{ generatedQuestions.length }} Questions</span>
+      </div>
+
+      <div class="gf-qcard" *ngFor="let q of generatedQuestions; let i=index">
+
+        <div class="gf-qcard-header">
+          <label class="gf-qcheck">
+            <input type="checkbox" [(ngModel)]="q.selected" [name]="'selected'+i">
+            <span class="gf-qcheck-mark"></span>
+          </label>
+
+          <span class="gf-qnum">Q{{ i + 1 }}</span>
+
+          <span class="gf-diff-chip"
+                [ngClass]="{
+                  'gf-diff-easy': q.difficulty === 'Easy',
+                  'gf-diff-medium': q.difficulty === 'Medium',
+                  'gf-diff-hard': q.difficulty === 'Hard'
+                }">
+            <i class="bi bi-lightning-charge-fill"></i>{{ q.difficulty }}
+          </span>
+
+          <button type="button" class="gf-delete-btn" (click)="removeGeneratedQuestion(i)">
+            <i class="bi bi-trash"></i>
+          </button>
+        </div>
+
+        <div class="gf-qcard-body">
+          <div class="gf-field">
+            <label class="gf-field-label">Question</label>
+            <textarea rows="2" class="form-control gf-textarea"
+                      [(ngModel)]="q.question_text" [name]="'question'+i"></textarea>
+          </div>
+
+          <div class="gf-field">
+            <label class="gf-field-label">Expected Answer</label>
+            <textarea rows="4" class="form-control gf-textarea"
+                      [(ngModel)]="q.expected_answer" [name]="'answer'+i"></textarea>
+          </div>
+
+          <div class="gf-field gf-field-narrow">
+            <label class="gf-field-label">Difficulty</label>
+            <select class="form-select gf-select" [(ngModel)]="q.difficulty" [name]="'difficulty'+i">
+              <option>Easy</option>
+              <option>Medium</option>
+              <option>Hard</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="gf-save-bar">
+        <span class="text-muted small">
+          {{ (generatedQuestions | slice:0).length ? '' : '' }}
+        </span>
+        <button class="btn gf-save-btn" (click)="saveGeneratedQuestions()">
+          <i class="bi bi-cloud-upload me-2"></i>
+          Save Selected Questions
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

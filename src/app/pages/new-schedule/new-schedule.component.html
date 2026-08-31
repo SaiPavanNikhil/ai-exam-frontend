@@ -1,0 +1,553 @@
+<!-- new-schedule.component.html -->
+<div class="app-shell">
+  <!-- ═══════════════════ MAIN AREA ═══════════════════ -->
+  <main class="main-content">
+
+    <!-- TOP BAR -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <h1 class="page-title">Schedule Interview</h1>
+        <span class="breadcrumb">Dashboard / Schedule Interview</span>
+      </div>
+      <div class="topbar-right">
+        
+      </div>
+    </div>
+
+    <div class="form-scroll">
+
+      <!-- ── GLOBAL SUCCESS / ERROR ALERTS ── -->
+      <div *ngIf="commitSuccess"
+           style="margin-bottom:16px;padding:12px 16px;background:#dcfce7;border:1px solid #bbf7d0;border-radius:10px;color:#15803d;font-size:13px;font-weight:500;">
+        {{ commitSuccess }}
+      </div>
+      <div *ngIf="commitError"
+           style="margin-bottom:16px;padding:12px 16px;background:#fef2f2;border:1px solid #fecaca;border-radius:10px;color:#dc2626;font-size:13px;">
+        ❌ {{ commitError }}
+      </div>
+
+
+      <!-- ══════════════════════════════════════════════ -->
+      <!-- CARD 1 — SELECT COURSE                        -->
+      <!-- ══════════════════════════════════════════════ -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon purple">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
+                    stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div>
+            <h3 class="card-title">1. Select Course from Master</h3>
+            <p class="card-sub">Choose a course — then upload candidate Excel below or fetch existing candidates</p>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div *ngIf="isLoadingCourses" style="display:flex;align-items:center;gap:10px;padding:8px 0;color:#6b7280;font-size:13px;">
+            <div class="spinner"></div> Loading courses...
+          </div>
+
+          <div *ngIf="coursesError && !isLoadingCourses"
+               style="padding:10px 14px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;color:#dc2626;font-size:13px;margin-bottom:12px;">
+            ❌ {{ coursesError }}
+            <button (click)="loadCourses()" style="margin-left:10px;color:#4f46e5;background:none;border:none;cursor:pointer;font-size:13px;">Retry</button>
+          </div>
+
+          <div *ngIf="!isLoadingCourses && !coursesError" style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;">
+            <div class="form-group" style="flex:1;min-width:260px;">
+              <label class="form-label">Course / Program <span class="req">*</span></label>
+              <select class="form-select"
+                      [(ngModel)]="selectedCourseCode"
+                      (change)="onCourseSelect()"
+                      name="courseCode">
+                <option value="" disabled selected>-- Select from course_master --</option>
+                <option *ngFor="let c of courses" [value]="c.course_id">
+                  {{ c.course_name }} — {{ c.branch_name }}
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <div *ngIf="selectedCourse" style="margin-top:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <span style="background:#ede9fe;color:#6d28d9;font-size:12px;font-weight:600;padding:4px 12px;border-radius:20px;">
+              {{ selectedCourse.course_code }}
+            </span>
+            <span style="font-size:13px;color:#374151;">{{ selectedCourse.course_name }} — {{ selectedCourse.branch_name }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════════════ -->
+      <!-- CARD 2 — UPLOAD CANDIDATE EXCEL                           -->
+      <!-- ══════════════════════════════════════════════════════════ -->
+      <div class="card" [style.opacity]="selectedCourseCode ? '1' : '0.5'">
+        <div class="card-header">
+          <div class="card-icon" style="background:#fef3c7;color:#b45309;">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+              <path d="M14 2v6h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              <path d="M8 13h8M8 17h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div>
+            <h3 class="card-title">2. Upload Candidate List</h3>
+            <p class="card-sub">
+              Required columns: <code>name</code>, <code>email</code>, <code>phone</code>, <code>department_branch</code>, <code>semester</code>
+              &nbsp;·&nbsp; Optional: <code>year</code>, <code>course</code>
+              &nbsp;·&nbsp; Semester must be 1–8
+            </p>
+          </div>
+        </div>
+
+        <div class="card-body">
+
+          <!-- Guard: must select course first -->
+          <div *ngIf="!selectedCourseCode"
+               style="padding:14px 16px;background:#fefce8;border:1px solid #fef08a;border-radius:8px;color:#854d0e;font-size:13px;">
+            ⚠️ Please select a course in Step 1 before uploading candidates.
+          </div>
+
+          <ng-container *ngIf="selectedCourseCode">
+
+            <!-- Parse success / error -->
+            <div *ngIf="candidateParseSuccess"
+                 style="margin-bottom:12px;padding:10px 14px;background:#dcfce7;border:1px solid #bbf7d0;border-radius:8px;color:#15803d;font-size:13px;font-weight:500;">
+              {{ candidateParseSuccess }}
+            </div>
+            <div *ngIf="candidateParseError"
+                 style="margin-bottom:12px;padding:10px 14px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;color:#dc2626;font-size:13px;">
+              ❌ {{ candidateParseError }}
+            </div>
+
+            <!-- File drop row -->
+            <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;">
+              <div class="form-group" style="flex:1;min-width:280px;">
+                <label class="form-label">Candidate Spreadsheet (.xlsx / .xls / .csv)</label>
+                <div style="border:1.5px dashed #d1d5db;border-radius:10px;padding:14px 16px;text-align:center;background:#fafafa;position:relative;">
+                  <span style="font-size:13px;color:#6b7280;" *ngIf="!candidateExcelFile">Click or drop candidate list file here…</span>
+                  <span style="font-size:13px;color:#b45309;font-weight:600;" *ngIf="candidateExcelFile">✓ {{ candidateExcelFile.name }}</span>
+                  <input type="file" accept=".xlsx,.xls,.csv"
+                         (change)="onCandidateExcelSelected($event)"
+                         [disabled]="isParsingCandidateExcel"
+                         style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;" />
+                </div>
+              </div>
+
+              <button *ngIf="parsedCandidateRows.length > 0" class="btn-primary" style="background:#6b7280;"
+                      (click)="clearCandidateExcel()">Clear</button>
+
+              <button class="btn-primary" style="background:#b45309;"
+                      [disabled]="parsedCandidateRows.length === 0 || isParsingCandidateExcel"
+                      (click)="loadParsedCandidatesIntoTable()">
+                Load {{ parsedCandidateRows.length || '' }} into Table ↓
+              </button>
+            </div>
+
+            <!-- Parsing spinner -->
+            <div *ngIf="isParsingCandidateExcel" style="display:flex;align-items:center;gap:10px;padding:12px 0;color:#6b7280;font-size:13px;">
+              <div class="spinner"></div> Parsing spreadsheet...
+            </div>
+
+            <!-- ── EDITABLE PREVIEW TABLE (Card 2) ── -->
+            <div *ngIf="parsedCandidateRows.length > 0 && !isParsingCandidateExcel"
+                 style="margin-top:16px;overflow-x:auto;border:1px solid #e5e7eb;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,0.05);">
+
+              <!-- Table header row count -->
+              <div style="padding:10px 16px;background:#fefce8;border-bottom:1px solid #fef08a;display:flex;align-items:center;justify-content:space-between;">
+                <span style="font-size:12px;font-weight:600;color:#854d0e;">
+                  ✏️ All fields editable · {{ parsedCandidateRows.length }} row(s)
+                </span>
+                <span style="font-size:11px;color:#a16207;">Click any cell to edit · Delete row with ✕</span>
+              </div>
+
+              <table style="width:100%;border-collapse:collapse;font-size:13px;">
+                <thead>
+                  <tr style="background:#fefce8;border-bottom:2px solid #fef08a;">
+                    <th style="padding:10px 12px;text-align:left;font-weight:600;color:#374151;white-space:nowrap;">#</th>
+                    <th style="padding:10px 12px;text-align:left;font-weight:600;color:#374151;white-space:nowrap;">Name</th>
+                    <th style="padding:10px 12px;text-align:left;font-weight:600;color:#374151;white-space:nowrap;">Email</th>
+                    <th style="padding:10px 12px;text-align:left;font-weight:600;color:#374151;white-space:nowrap;">Phone</th>
+                    <th style="padding:10px 12px;text-align:left;font-weight:600;color:#374151;white-space:nowrap;">Branch</th>
+                    <th style="padding:10px 12px;text-align:left;font-weight:600;color:#1d4ed8;white-space:nowrap;">Semester <span style="color:#dc2626;">*</span></th>
+                    <th style="padding:10px 12px;text-align:left;font-weight:600;color:#7c3aed;white-space:nowrap;">Year</th>
+                    <th style="padding:10px 12px;text-align:left;font-weight:600;color:#7c3aed;white-space:nowrap;">Course</th>
+                    <th style="padding:10px 12px;text-align:center;font-weight:600;color:#dc2626;white-space:nowrap;">Del</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let row of parsedCandidateRows; let i = index"
+                      style="border-bottom:1px solid #f3f4f6;transition:background 0.12s;"
+                      onmouseover="this.style.background='#fffbeb'"
+                      onmouseout="this.style.background=''">
+
+                    <!-- # -->
+                    <td style="padding:8px 12px;color:#9ca3af;font-size:12px;vertical-align:middle;">{{ i + 1 }}</td>
+
+                    <!-- Name (EDITABLE) -->
+                    <td style="padding:6px 8px;vertical-align:middle;">
+                      <input
+                        [(ngModel)]="row.name"
+                        [name]="'pname_' + i"
+                        placeholder="Full name"
+                        style="width:100%;min-width:130px;font-weight:600;color:#111827;font-size:13px;padding:5px 8px;border-radius:6px;border:1px solid #e5e7eb;background:#fff;outline:none;"
+                        onfocus="this.style.borderColor='#f59e0b';this.style.boxShadow='0 0 0 2px #fef3c7'"
+                        onblur="this.style.borderColor='#e5e7eb';this.style.boxShadow='none'" />
+                    </td>
+
+                    <!-- Email (EDITABLE) -->
+                    <td style="padding:6px 8px;vertical-align:middle;">
+                      <input
+                        [(ngModel)]="row.email"
+                        [name]="'pemail_' + i"
+                        type="email"
+                        placeholder="email@example.com"
+                        style="width:100%;min-width:170px;color:#6b7280;font-size:13px;padding:5px 8px;border-radius:6px;border:1px solid #e5e7eb;background:#fff;outline:none;"
+                        onfocus="this.style.borderColor='#f59e0b';this.style.boxShadow='0 0 0 2px #fef3c7'"
+                        onblur="this.style.borderColor='#e5e7eb';this.style.boxShadow='none'" />
+                    </td>
+
+                    <!-- Phone (EDITABLE) -->
+                    <td style="padding:6px 8px;vertical-align:middle;">
+                      <input
+                        [(ngModel)]="row.phone"
+                        [name]="'pphone_' + i"
+                        placeholder="Phone"
+                        style="width:100%;min-width:110px;color:#374151;font-size:13px;padding:5px 8px;border-radius:6px;border:1px solid #e5e7eb;background:#fff;outline:none;"
+                        onfocus="this.style.borderColor='#f59e0b';this.style.boxShadow='0 0 0 2px #fef3c7'"
+                        onblur="this.style.borderColor='#e5e7eb';this.style.boxShadow='none'" />
+                    </td>
+
+                    <!-- Branch (EDITABLE) -->
+                    <td style="padding:6px 8px;vertical-align:middle;">
+                      <input
+                        [(ngModel)]="row.department_branch"
+                        [name]="'pbranch_' + i"
+                        placeholder="Branch"
+                        style="width:100%;min-width:80px;color:#0369a1;font-weight:600;font-size:12px;padding:5px 10px;border-radius:20px;border:1.5px solid #bae6fd;background:#e0f2fe;outline:none;text-align:center;"
+                        onfocus="this.style.borderColor='#0369a1';this.style.boxShadow='0 0 0 2px #e0f2fe'"
+                        onblur="this.style.borderColor='#bae6fd';this.style.boxShadow='none'" />
+                    </td>
+
+                    <!-- Semester (EDITABLE — dropdown) -->
+                    <td style="padding:6px 8px;vertical-align:middle;">
+                      <select
+                        [(ngModel)]="row.semester"
+                        [name]="'psem_' + i"
+                        style="min-width:100px;font-size:13px;padding:5px 8px;border-radius:8px;border:1px solid #d1d5db;outline:none;cursor:pointer;"
+                        [style.borderColor]="row.semester === null ? '#f97316' : '#d1d5db'"
+                        [style.background]="row.semester === null ? '#fff7ed' : '#fff'">
+                        <option [ngValue]="null" disabled>-- Sem --</option>
+                        <option *ngFor="let s of semesterOptions" [ngValue]="s">Sem {{ s }}</option>
+                      </select>
+                    </td>
+
+                    <!-- Year (EDITABLE — dropdown) -->
+                    <td style="padding:6px 8px;vertical-align:middle;">
+                      <select
+                        [(ngModel)]="row.year"
+                        [name]="'pyear_' + i"
+                        style="min-width:110px;font-size:13px;padding:5px 8px;border-radius:8px;border:1px solid #d1d5db;background:#fff;outline:none;cursor:pointer;">
+                        <option [ngValue]="null">— Year —</option>
+                        <option *ngFor="let y of yearOptions" [ngValue]="y">{{ y }}</option>
+                      </select>
+                    </td>
+
+                    <!-- Course (EDITABLE) -->
+                    <td style="padding:6px 8px;vertical-align:middle;">
+                      <input
+                        [(ngModel)]="row.course"
+                        [name]="'pcourse_' + i"
+                        placeholder="Course"
+                        style="width:100%;min-width:80px;color:#92400e;font-weight:600;font-size:12px;padding:5px 10px;border-radius:20px;border:1.5px solid #fcd34d;background:#fef3c7;outline:none;text-align:center;"
+                        onfocus="this.style.borderColor='#b45309';this.style.boxShadow='0 0 0 2px #fef3c7'"
+                        onblur="this.style.borderColor='#fcd34d';this.style.boxShadow='none'" />
+                    </td>
+
+                    <!-- DELETE ROW -->
+                    <td style="padding:6px 12px;text-align:center;vertical-align:middle;">
+                      <button
+                        (click)="parsedCandidateRows.splice(i, 1); candidateParseSuccess = parsedCandidateRows.length + ' row(s) remaining.'"
+                        title="Delete this row"
+                        style="width:28px;height:28px;border-radius:50%;border:none;background:#fef2f2;color:#dc2626;font-size:15px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:background 0.15s;line-height:1;"
+                        onmouseover="this.style.background='#dc2626';this.style.color='#fff'"
+                        onmouseout="this.style.background='#fef2f2';this.style.color='#dc2626'">
+                        ✕
+                      </button>
+                    </td>
+
+                  </tr>
+                </tbody>
+              </table>
+
+              <!-- Empty state after all deleted -->
+              <div *ngIf="parsedCandidateRows.length === 0"
+                   style="padding:30px;text-align:center;color:#9ca3af;font-size:13px;">
+                All rows deleted. Upload a new file to start again.
+              </div>
+
+            </div>
+
+            <!-- Divider: OR fetch existing -->
+            <div style="display:flex;align-items:center;gap:12px;margin:20px 0;">
+              <div style="flex:1;height:1px;background:#e5e7eb;"></div>
+              <span style="font-size:12px;color:#9ca3af;white-space:nowrap;">OR fetch existing candidates from database</span>
+              <div style="flex:1;height:1px;background:#e5e7eb;"></div>
+            </div>
+
+            <!-- <button
+              class="btn-primary"
+              [disabled]="!selectedCourseCode || isLoadingCandidates"
+              (click)="fetchCandidates()"
+              style="padding:10px 20px;display:inline-flex;align-items:center;gap:6px;">
+              <svg viewBox="0 0 24 24" fill="none" width="15" height="15" stroke="currentColor" stroke-width="2">
+                <path d="M23 4v6h-6M1 20v-6h6"/>
+                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Fetch Existing Candidates
+            </button> -->
+
+            <button
+          class="btn-schedule"
+          [disabled]="!canCommit() || isCommitting"
+          (click)="commitAll()">
+          <svg *ngIf="!isCommitting" viewBox="0 0 24 24" fill="none" width="16" height="16" stroke="currentColor" stroke-width="2">
+            <path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span *ngIf="!isCommitting">Save Students</span>
+          <span *ngIf="isCommitting">⏳ Committing...</span>
+        </button>
+
+          </ng-container>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════ -->
+      <!-- CARD 3 — CANDIDATE TABLE + FULLY EDITABLE     -->
+      <!-- ══════════════════════════════════════════════ -->
+      <div class="card" style="padding:0;overflow:hidden;">
+
+        <div style="padding:18px 24px;border-bottom:1px solid #f3f4f6;display:flex;align-items:center;justify-content:space-between;">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div class="card-icon blue">
+              <svg viewBox="0 0 24 24" fill="none">
+                <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.8"/>
+                <path d="M3 9h18M3 15h18M9 3v18M15 3v18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div>
+              <h3 class="card-title">3. Review &amp; Edit All Fields</h3>
+              <p class="card-sub">All fields are editable — fix any data, assign semester / year, then Commit to Database</p>
+            </div>
+          </div>
+          <span style="background:#f3f4f6;color:#374151;font-size:12px;font-weight:600;padding:4px 12px;border-radius:20px;">
+            {{ totalCount }} records
+          </span>
+        </div>
+
+        <!-- Stats Row -->
+        <div *ngIf="candidates.length > 0"
+             style="display:flex;gap:16px;padding:16px 24px;background:#fafafa;border-bottom:1px solid #f3f4f6;">
+          <div style="flex:1;background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:10px;">
+            <div style="width:36px;height:36px;background:#ede9fe;border-radius:9px;display:flex;align-items:center;justify-content:center;">
+              <svg viewBox="0 0 24 24" fill="none" width="18" height="18" stroke="#7c3aed" stroke-width="1.8">
+                <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div>
+              <div style="font-size:20px;font-weight:700;color:#111827;">{{ totalCount }}</div>
+              <div style="font-size:11px;color:#6b7280;">Total candidates</div>
+            </div>
+          </div>
+          <div style="flex:1;background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:10px;">
+            <div style="width:36px;height:36px;background:#dcfce7;border-radius:9px;display:flex;align-items:center;justify-content:center;">
+              <svg viewBox="0 0 24 24" fill="none" width="18" height="18" stroke="#16a34a" stroke-width="1.8">
+                <path d="M9 11l3 3L22 4" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div>
+              <div style="font-size:20px;font-weight:700;color:#111827;">{{ assignedCount }}</div>
+              <div style="font-size:11px;color:#6b7280;">Semester assigned</div>
+            </div>
+          </div>
+          <div style="flex:1;background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:10px;">
+            <div style="width:36px;height:36px;background:#fff7ed;border-radius:9px;display:flex;align-items:center;justify-content:center;">
+              <svg viewBox="0 0 24 24" fill="none" width="18" height="18" stroke="#ea580c" stroke-width="1.8">
+                <circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 3" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div>
+              <div style="font-size:20px;font-weight:700;color:#111827;">{{ pendingCount }}</div>
+              <div style="font-size:11px;color:#6b7280;">Pending assignment</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Loading -->
+        <div *ngIf="isLoadingCandidates"
+             style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px;gap:14px;">
+          <div class="spinner"></div>
+          <p style="color:#6b7280;font-size:14px;margin:0;">Fetching candidates...</p>
+        </div>
+
+        <!-- Error -->
+        <div *ngIf="candidatesError && !isLoadingCandidates"
+             style="margin:20px 24px;padding:12px 16px;background:#fef2f2;border:1px solid #fecaca;border-radius:10px;color:#dc2626;font-size:13px;">
+          ❌ {{ candidatesError }}
+        </div>
+
+        <!-- Empty — no course selected -->
+        <div *ngIf="!isLoadingCandidates && !candidatesError && candidates.length === 0 && !selectedCourseCode"
+             style="padding:60px;text-align:center;">
+          <svg viewBox="0 0 24 24" fill="none" width="48" height="48" style="margin:0 auto 14px;display:block;" stroke="#d1d5db" stroke-width="1.2">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <p style="color:#9ca3af;font-size:15px;margin:0;">Select a course first, then upload candidates or fetch from database</p>
+        </div>
+
+        <!-- Empty — course selected but no candidates loaded yet -->
+        <div *ngIf="!isLoadingCandidates && !candidatesError && candidates.length === 0 && selectedCourseCode"
+             style="padding:60px;text-align:center;">
+          <svg viewBox="0 0 24 24" fill="none" width="48" height="48" style="margin:0 auto 14px;display:block;" stroke="#d1d5db" stroke-width="1.2">
+            <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke-linecap="round"/>
+          </svg>
+          <p style="color:#9ca3af;font-size:15px;margin:0;">Upload a candidate Excel (Step 2) or fetch existing candidates</p>
+        </div>
+
+        <!-- ── FULLY EDITABLE TABLE (Card 3) ── -->
+        <div *ngIf="!isLoadingCandidates && candidates.length > 0" style="overflow-x:auto;">
+          <table style="width:100%;border-collapse:collapse;font-size:13px;">
+            <thead>
+              <tr style="background:#f9fafb;border-bottom:1px solid #f3f4f6;">
+                <th style="padding:12px 16px;text-align:left;font-weight:600;color:#374151;white-space:nowrap;">#</th>
+                <th style="padding:12px 16px;text-align:left;font-weight:600;color:#374151;white-space:nowrap;">Student Full Name</th>
+                <th style="padding:12px 16px;text-align:left;font-weight:600;color:#374151;white-space:nowrap;">Email Address</th>
+                <th style="padding:12px 16px;text-align:left;font-weight:600;color:#374151;white-space:nowrap;">Phone</th>
+                <th style="padding:12px 16px;text-align:left;font-weight:600;color:#374151;white-space:nowrap;">Department / Branch</th>
+                <th style="padding:12px 16px;text-align:left;font-weight:600;color:#1d4ed8;white-space:nowrap;">
+                  Semester <span style="color:#dc2626;">*</span>
+                </th>
+                <th style="padding:12px 16px;text-align:left;font-weight:600;color:#7c3aed;white-space:nowrap;">Year</th>
+                <th style="padding:12px 16px;text-align:left;font-weight:600;color:#7c3aed;white-space:nowrap;">Course</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let c of candidates; let i = index"
+                  style="border-bottom:1px solid #f3f4f6;transition:background 0.15s;"
+                  onmouseover="this.style.background='#fafafa'"
+                  onmouseout="this.style.background=''">
+
+                <!-- # -->
+                <td style="padding:12px 16px;color:#9ca3af;font-weight:500;vertical-align:middle;">{{ i + 1 }}</td>
+
+                <!-- Name (EDITABLE) -->
+                <td style="padding:10px 16px;vertical-align:middle;">
+                  <div style="display:flex;align-items:center;gap:10px;">
+                    <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#4f46e5,#7c3aed);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px;flex-shrink:0;">
+                      {{ getInitials(c.name) }}
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:3px;">
+                      <input
+                        [(ngModel)]="c.name"
+                        [name]="'name_' + i"
+                        style="font-weight:600;color:#111827;font-size:13px;padding:5px 8px;border-radius:6px;border:1px solid #e5e7eb;background:#fff;min-width:140px;outline:none;transition:border-color 0.15s;"
+                        onfocus="this.style.borderColor='#6d28d9'"
+                        onblur="this.style.borderColor='#e5e7eb'"
+                        placeholder="Full name" />
+                      <span *ngIf="c.id === 0"
+                            style="background:#fef3c7;color:#b45309;font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;width:fit-content;">NEW</span>
+                    </div>
+                  </div>
+                </td>
+
+                <!-- Email (EDITABLE) -->
+                <td style="padding:10px 16px;vertical-align:middle;">
+                  <input
+                    [(ngModel)]="c.email"
+                    [name]="'email_' + i"
+                    type="email"
+                    style="color:#6b7280;font-size:13px;padding:5px 8px;border-radius:6px;border:1px solid #e5e7eb;background:#fff;min-width:190px;outline:none;transition:border-color 0.15s;"
+                    onfocus="this.style.borderColor='#6d28d9'"
+                    onblur="this.style.borderColor='#e5e7eb'"
+                    placeholder="email@example.com" />
+                </td>
+
+                <!-- Phone (EDITABLE) -->
+                <td style="padding:10px 16px;vertical-align:middle;">
+                  <input
+                    [(ngModel)]="c.phone"
+                    [name]="'phone_' + i"
+                    style="color:#374151;font-size:13px;padding:5px 8px;border-radius:6px;border:1px solid #e5e7eb;background:#fff;min-width:120px;outline:none;transition:border-color 0.15s;"
+                    onfocus="this.style.borderColor='#6d28d9'"
+                    onblur="this.style.borderColor='#e5e7eb'"
+                    placeholder="Phone number" />
+                </td>
+
+                <!-- Branch (EDITABLE) -->
+                <td style="padding:10px 16px;vertical-align:middle;">
+                  <input
+                    [(ngModel)]="c.department_branch"
+                    [name]="'branch_' + i"
+                    style="color:#0369a1;font-size:12px;font-weight:600;padding:5px 10px;border-radius:20px;border:1.5px solid #bae6fd;background:#e0f2fe;min-width:80px;outline:none;text-align:center;transition:border-color 0.15s;"
+                    onfocus="this.style.borderColor='#0369a1'"
+                    onblur="this.style.borderColor='#bae6fd'"
+                    placeholder="Branch" />
+                </td>
+
+                <!-- Semester (EDITABLE — dropdown) -->
+                <td style="padding:10px 16px;vertical-align:middle;">
+                  <select
+                    class="form-select"
+                    [(ngModel)]="c.semester"
+                    [name]="'sem_' + i"
+                    style="max-width:120px;font-size:13px;padding:6px 10px;border-radius:8px;border:1px solid #d1d5db;outline:none;"
+                    [style.border-color]="!c.semester ? '#f97316' : '#d1d5db'"
+                    [style.background]="!c.semester ? '#fff7ed' : '#fff'">
+                    <option [ngValue]="null" disabled>-- Select --</option>
+                    <option *ngFor="let s of semesterOptions" [ngValue]="s">Sem {{ s }}</option>
+                  </select>
+                </td>
+
+                <!-- Year (EDITABLE — dropdown) -->
+                <td style="padding:10px 16px;vertical-align:middle;">
+                  <select
+                    class="form-select"
+                    [(ngModel)]="c.year"
+                    [name]="'year_' + i"
+                    style="max-width:130px;font-size:13px;padding:6px 10px;border-radius:8px;border:1px solid #d1d5db;outline:none;"
+                    [style.border-color]="!c.year ? '#f97316' : '#d1d5db'"
+                    [style.background]="!c.year ? '#fff7ed' : '#fff'">
+                    <option [ngValue]="null">— Year —</option>
+                    <option *ngFor="let y of yearOptions" [ngValue]="y">{{ y }}</option>
+                  </select>
+                </td>
+
+                <!-- Course (EDITABLE — text input) -->
+                <td style="padding:10px 16px;vertical-align:middle;">
+                  <input
+                    [(ngModel)]="c.course"
+                    [name]="'course_' + i"
+                    style="color:#92400e;font-size:12px;font-weight:600;padding:5px 10px;border-radius:20px;border:1.5px solid #fcd34d;background:#fef3c7;min-width:80px;outline:none;text-align:center;transition:border-color 0.15s;"
+                    onfocus="this.style.borderColor='#b45309'"
+                    onblur="this.style.borderColor='#fcd34d'"
+                    placeholder="Course" />
+                </td>
+
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pending warning -->
+        <div *ngIf="candidates.length > 0 && pendingCount > 0"
+             style="margin:16px 24px;padding:10px 16px;background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;font-size:13px;color:#9a3412;">
+          ⚠️ {{ pendingCount }} candidate(s) still need a semester assigned before you can commit.
+        </div>
+
+      </div><!-- /card 3 -->
+
+    </div><!-- /form-scroll -->
+  </main>
+</div>

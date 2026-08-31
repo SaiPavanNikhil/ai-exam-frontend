@@ -1,0 +1,725 @@
+<main class="main">
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1>Committee Member Dashboard</h1>
+      <!-- <p>InterView ID: {{ selectedCandidate.schedule.interviewId }} &nbsp;·&nbsp; {{ selectedCandidate.schedule.date }} &nbsp;·&nbsp; {{ selectedCandidate.schedule.time }}</p> -->
+    </div>
+    <div class="topbar-right">
+      <span class="badge-role">♛ {{ user.name }}</span>
+      <span class="badge-role" style="background:#f0fdf4;color:#16a34a;">Panel: {{ user.designation }}</span>
+
+      <!-- ✅ Chairman Button -->
+      <!-- <button class="chairman-btn" (click)="goToChairmanPage()">
+        Go To Chairman Panel
+      </button> -->
+      <button class="logout-btn" (click)="logout()">
+        Logout
+      </button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- STATISTICS -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-label">Total Interviews</div>
+        <div class="stat-value">{{ dashboard.total }}</div>
+        <div class="stat-sub ok">Assigned to your panel</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Evaluated</div>
+        <div class="stat-value">{{ dashboard.evaluated }}</div>
+        <div class="stat-sub ok">Completed today</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Pending</div>
+        <div class="stat-value">{{ dashboard.pending }}</div>
+        <div class="stat-sub warn">Awaiting evaluation</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">In Progress</div>
+        <div class="stat-value">{{ dashboard.in_progress }}</div>
+        <div class="stat-sub" style="color:#2563eb;">Currently interviewing</div>
+      </div>
+    </div>
+
+    <div class="qa-card">
+
+      <!-- HEADER -->
+      <div class="qa-header">
+        <div class="header-left">
+          <div class="qa-icon">📋</div>
+          <div>
+            <h3>Interview List</h3>
+            <span class="subtitle">Scheduled & completed interviews</span>
+          </div>
+        </div>
+
+        <div class="header-right">
+          <span class="count">{{ interviews.length }}</span>
+        </div>
+      </div>
+
+      <div class="interview-list-scroll">
+      <!-- TABLE -->
+      <div class="qa-table">
+
+        <!-- HEADER -->
+        <div class="qa-row qa-head">
+          <div>ID</div>
+          <!-- <div>Candidate</div> -->
+          <div>Type</div>
+          <div>Date</div>
+          <div>Status</div>
+          <div>Action</div>
+        </div>
+
+        <!-- DATA -->
+        <div class="qa-row" *ngFor="let q of interviews; let i = index">
+
+          <div class="id" data-label="ID">{{ q.interview_id }}</div>
+
+          <!-- <div data-label="Candidate">
+            {{ q.candidate_name || '-' }}
+          </div> -->
+
+          <div data-label="Type">
+            {{ q.interview_category || 'Technical' }}
+          </div>
+
+          <div class="date" data-label="Date">
+            {{ q.scheduled_at }}
+          </div>
+
+          <div data-label="Status">
+            <span class="status" [ngClass]="q.status">
+              {{ q.status }}
+            </span>
+          </div>
+          <button class="view-btn" (click)="viewDetails(q,i)">
+            {{ selectedInterview === q ? 'Hide' : 'View' }}
+          </button>
+
+
+
+        </div>
+
+      </div>
+
+      </div>
+
+    </div>
+
+    <!-- 🔽 EXPANDABLE DETAILS -->
+
+   <div class="qa-detail-outside" *ngIf="selectedInterview">
+
+  <div class="detail-bar">
+    
+    <!-- LEFT -->
+    <div class="detail-left">
+      <div class="title">📋 Interview Details</div>
+        <button class="close-btn" (click)="closeRightPanel()">✖</button>
+    </div>
+
+    
+    <!-- CENTER INFO -->
+   <div class="detail-info">
+
+      <div>
+        <span>ID</span>
+        <b>{{ selectedInterview.interview_id }}</b>
+      </div>
+
+      <div>
+        <span>Candidates</span>
+        <b>{{ assignCandidates.length }}</b>
+      </div>
+
+      <div>
+        <span>Role</span>
+        <b class="role">{{ selectedInterview.role || '-' }}</b>
+      </div>
+
+    </div>
+
+    </div>
+    <!-- RIGHT -->
+  
+
+</div>
+    <div class="layout">
+
+      <!-- LEFT DROPDOWN -->
+      <div class="left" *ngIf="selectedInterview">
+        <!-- this dropdown Start -->
+        <div class="candidate-list">
+
+  <h3>Assigned Candidates</h3>
+
+  <div class="candidate-scroll">
+
+    <div
+        class="candidate-box"
+        *ngFor="let candidate of assignCandidates; let i=index"
+        [class.active]="selectedIndex === i"
+        (click)="selectCandidate(candidate,i)">
+
+        <div class="candidate-avatar">
+            {{ candidate.candidate_name.charAt(0) }}
+        </div>
+
+        <div class="candidate-name">
+            {{ candidate.candidate_name }}
+        </div>
+
+    </div>
+
+</div>
+
+</div>
+        <!-- this dropdown END -->
+      </div>
+
+      <!-- RIGHT DETAILS -->
+      <div class="right" *ngIf="selectedCandidate">
+
+        <div class="right-panel" *ngIf="selectedCandidate">
+
+          <!-- HEADER -->
+          <div class="header">
+             
+            <div class="avatar">
+              {{ selectedCandidate.name.charAt(0) }}
+            </div>
+
+            <div>
+              <h2>{{ selectedCandidate.name }}</h2>
+              <p>
+                {{ selectedCandidate.student_course_program }} ·
+                {{ selectedCandidate.student_department_branch }} ·
+                {{ selectedCandidate.student_university }}
+              </p>
+            </div>
+
+            <!-- <a class="video-btn" [href]="selectedCandidate.recordedVideo" target="_blank">
+              ▶ Watch Interview
+            </a> -->
+            <a class="video-btn"
+              [href]="'${environment.apiBaseUrl}/videos/' + selectedCandidate.recordedVideo"
+              target="_blank"
+              rel="noopener noreferrer">
+              ▶ Watch Interview
+            </a>
+
+
+            <!-- 📄 RESUME -->
+            <a *ngIf="selectedCandidate?.resumeUrl"
+              class="resume-btn"
+              [href]="selectedCandidate.resumeUrl"
+              target="_blank"
+              rel="noopener">
+              📄 View Resume
+            </a>
+          </div>
+<div class="info-card">
+
+  <h3 class="card-title">Candidate Details</h3>
+
+  <!-- TOP ROW (3 sections in one line) -->
+  <div class="top-sections">
+
+    <!-- CONTACT -->
+    <div class="section">
+      <h4>Contact Details</h4>
+
+      <div class="info-row">
+        <span>Mobile</span>
+        <b>{{ selectedCandidate.mob }}</b>
+      </div>
+
+      <div class="info-row">
+        <span>Email</span>
+        <b>{{ selectedCandidate.email }}</b>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+        </div>
+<div >
+
+        </div>
+<div >
+
+          
+      
+
+        </div>
+<div >
+  <!-- <div *ngIf="selectedInterview?.status === 'Completed'"></div> -->
+    <div class="panel-table-card" *ngIf="selectedInterview?.role?.toLowerCase() === 'chairman'">
+
+  <!-- HEADER -->
+  <div class="table-header">
+    <div class="header-left">
+      <div class="ai-icon">👥</div>
+      <div>
+        <h3>Panel Members Evaluation</h3>
+        <p>Evaluation status of panel members</p>
+      </div>
+    </div>
+
+    <div class="summary">
+      📊 {{ completedCount }} / {{ panelMembers?.length || 0 }} Completed
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-wrapper">
+    <div class="table">
+
+      <!-- HEADER -->
+      <div class="tr th">
+        <div>👤 Member</div>
+        <div>🎖️ Role</div>
+        <div>💼 Expertise</div>
+        <div>📊 Status</div>
+        <div>👁️ Action</div>
+      </div>
+
+      <!-- ROW -->
+      <div class="tr" *ngFor="let member of panelMembers">
+
+        <!-- MEMBER -->
+        <div class="td member">
+          <div class="avatar">
+            {{ member.name.charAt(0) }}
+          </div>
+          <div>
+            <div class="name">👤 {{ member.name }}</div>
+            <small>ID: {{ member.memberid }}</small>
+          </div>
+        </div>
+
+        <!-- ROLE -->
+        <div class="td">
+          <span class="badge" [class.chairman]="member.panel_role === 'chairman'">
+            🎖️ {{ member.panel_role }}
+          </span>
+        </div>
+
+        <!-- EXPERTISE -->
+        <div class="td">
+          💼 {{ member.designation }}
+        </div>
+
+        <!-- STATUS -->
+        <div class="td">
+          <span class="status"
+                [class.done]="member.status === 'Done'"
+                [class.pending]="member.status === 'Pending'">
+
+            {{ member.status === 'Done' ? '✅' : '⏳' }}
+            {{ member.status }}
+          </span>
+        </div>
+
+        <!-- ACTION -->
+        <div class="td">
+          <button *ngIf="member.status === 'Done'"
+                  class="view-btn"
+                  (click)="viewMemberDetails(member)">
+            👁️ View
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+        <!-- <div class="ai-card">
+
+          <div class="ai-header">
+            AI Pre-Screening Insights
+          </div>
+
+          <div class="ai-body">
+
+            
+            <div class="ai-row">
+              <div class="ai-label">Analysis Summary</div>
+              <div class="ai-value">
+                {{ selectedCandidate?.analysisSummary ||
+                'Candidate shows strong analytical ability and technical skills.' }}
+              </div>
+            </div>
+
+       
+            <div class="ai-row">
+              <div class="ai-label">Insight Tags</div>
+              <div class="ai-tags">
+                <span *ngFor="let tag of selectedCandidate?.insightTags || defaultTags" [ngClass]="getTagClass(tag)">
+                  {{ tag }}
+                </span>
+              </div>
+            </div>
+
+          </div>
+
+        </div> -->
+<!-- <div class="qa-card">
+
+ 
+<div class="qa-header">
+  <div class="header-left">
+    <div class="qa-icon">💬</div>
+    <div class="title">
+      <h3>Q&A Evaluation AI Log</h3>
+      <p>Question-wise performance and scoring</p>
+    </div>
+  </div>
+</div>
+
+  
+  <div class="table-wrapper">
+    <table class="qa-table">
+
+      <thead>
+        <tr>
+          <th>Question Asked</th>
+          <th>Answer Summary</th>
+          <th>Score</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let q of staticQA">
+          <td data-label="Question">{{ q.question }}</td>
+          <td data-label="Answer">{{ q.answer }}</td>
+          <td data-label="Score">
+            <span class="score">{{ q.score }}/10</span>
+          </td>
+        </tr>
+      </tbody>
+
+    </table>
+  </div>
+
+</div> -->
+
+        <!-- <div class="qa-card">
+
+        
+          <div class="qa-header">
+            <div class="qa-icon">💬</div>
+            <div>
+              <h3>Q&A Evaluation AI Log</h3>
+              <p>Question-wise performance and scoring</p>
+            </div>
+          </div>
+
+        
+          <div class="qa-table">
+
+            <div class="qa-row qa-head">
+              <div>Question Asked</div>
+              <div>Answer Summary</div>
+              <div>Score</div>
+            </div>
+
+            <div class="qa-row" *ngFor="let q of staticQA">
+              <div class="question">{{ q.question }}</div>
+              <div class="answer">{{ q.answer }}</div>
+              <div>
+                <span class="score">{{ q.score }}/10</span>
+              </div>
+            </div>
+
+          </div>
+
+        </div> -->
+
+        <!-- <div class="qa-card">
+
+          
+          <div class="qa-header">
+            <div class="qa-icon">💬</div>
+            <div>
+              <h3>Q&A Evaluation Log</h3>
+              <p>Question-wise performance and scoring</p>
+            </div>
+          </div>
+
+          <div class="qa-table">
+
+           
+            <div class="qa-row qa-head">
+              <div>Question Asked</div>
+              <div>Candidate Answer</div>
+              <div>Expected Answer</div>
+              <div>Score</div>
+            </div>
+
+          
+            <div class="qa-row" *ngFor="let q of selectedCandidate?.qaList ">
+              <div class="question">{{ q.question }}</div>
+
+              <div class="answer">
+                {{ q.answer || 'No answer provided' }}
+              </div>
+
+              <div class="expected">
+                {{ q.expectedAnswer }}
+              </div>
+
+              <div class="score-cell">
+                <input type="number" min="0" max="10" [(ngModel)]="q.score" class="score-input" />
+              </div>
+            </div>
+
+          </div>
+
+        </div> -->
+
+        <div class="qa-card">
+
+  <!-- HEADER -->
+ <div class="qa-header">
+  <div class="header-left">
+    <div class="qa-icon">💬</div>
+    <div class="title">
+      <h3>Q&A Evaluation  Log</h3>
+      <p>Question-wise performance and scoring</p>
+    </div>
+  </div>
+</div>
+
+  <!-- TABLE -->
+  <div class="table-wrapper">
+    <table class="qa-table">
+
+      <thead>
+        <tr>
+          <th>Question Asked</th>
+          <th>Candidate Answer</th>
+          <th>Expected Answer</th>
+          <th>Ai Response</th>
+          <th>Score</th>
+          <th>Ai Score</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let q of selectedCandidate?.qaList">
+
+          <td class="question">
+            {{ q.question }}
+          </td>
+
+          <td class="answer">
+            {{ q.answer || 'No answer provided' }}
+          </td>
+
+          <td class="expected">
+            {{ q.expectedAnswer }}
+          </td>
+          <td class="ai-response">
+            {{ q.ai_response || 'No AI response' }}
+          </td>
+          
+
+          <td class="score-cell">
+            <input type="number"
+                   min="0"
+                   max="10"
+                   [(ngModel)]="q.score"
+                   class="score-input" [disabled]="isEvaluated" />
+          </td>
+          <td class="ai-score">
+            {{ q.ai_score || '0' }}/10
+          </td>
+
+        </tr>
+      </tbody>
+
+    </table>
+  </div>
+
+</div>
+        <div class="card">
+          <div class="header">
+            <div class="icon">✔</div>
+            
+            <div>
+              <h3>Final Marking & Verdict</h3>
+              <small>Enter scores out of 10 each</small>
+            </div>
+          </div>
+
+          <div *ngFor="let item of criteria" class="row">
+            <label>{{ item.name }}</label>
+
+            <input type="range" min="0" max="10" [(ngModel)]="item.score" [disabled]="isEvaluated" />
+
+            <input type="number" min="0" max="10" [(ngModel)]="item.score" class="score-box" [disabled]="isEvaluated" />
+          </div>
+
+          <hr>
+
+          <div class="total">
+            <div>
+              <strong>Total Score</strong>
+              <small>out of 40</small>
+            </div>
+            <div class="total-value">{{ totalScore }}</div>
+          </div>
+
+          <div class="remarks">
+            <label>Remarks / Observations</label>
+            <textarea [(ngModel)]="remarks" [disabled]="isEvaluated"  placeholder="Enter your observations..."   ></textarea>
+          </div>
+
+          <div class="verdict" *ngIf="selectedInterview?.role?.toLowerCase() === 'chairman'">
+            <label>Final Verdict</label>
+            <div class="buttons">
+              <button [class.active]="verdict === 'Selected'" (click)="selectVerdict('Selected')">
+                Selected
+              </button>
+
+              <button [class.active]="verdict === 'Hold'" (click)="selectVerdict('Hold')">
+                Hold
+              </button>
+
+              <button [class.active]="verdict === 'Rejected'" (click)="selectVerdict('Rejected')">
+                Rejected
+              </button>
+            </div>
+          </div>
+
+          <button class="submit-btn" (click)="submit()"   [disabled]="isEvaluated" >
+            Submit Final Evaluation
+          </button>
+        </div>
+        </div>
+      </div>
+
+      <div class="modal-overlay" *ngIf="isMemberModalOpen" (click)="closeMemberModal()">
+
+  <div class="modal-content" (click)="$event.stopPropagation()">
+
+    <!-- HEADER -->
+    <div class="modal-header">
+      <h3>Member Evaluation Details</h3>
+      <button class="close-btn" (click)="closeMemberModal()">✖</button>
+    </div>
+
+    <!-- FINAL MARKS -->
+<div class="modal-section" *ngIf="members.length">
+
+  <h4 class="section-title">Final Evaluation</h4>
+
+  <div class="table-container final-table">
+
+    <!-- HEADER -->
+    <div class="table-row table-head">
+      <div>Member</div>
+      <div>Technical</div>
+      <div>Problem Solving</div>
+      <div>Communication</div>
+      <div>Domain</div>
+      <div>Overall</div>
+      <div>Total</div>
+       <div>Average</div>
+      <div>Remark</div>
+      <!-- <div>Status</div> -->
+    </div>
+
+    <!-- DATA -->
+    <div class="table-row" *ngFor="let member of members">
+      <div data-label="Member">{{ member.name }}</div>
+      <div data-label="Technical">{{ member.technical_knowledge }}</div>
+      <div data-label="Problem">{{ member.problem_solving }}</div>
+      <div data-label="Communication">{{ member.communication }}</div>
+      <div data-label="Domain">{{ member.domain_aptitude }}</div>
+      <div class="overall" data-label="Overall">{{ member.overall_impression }}</div>
+      
+         <div data-label="Remark">   {{ getTotal(member) }}</div>
+            <div data-label="Remark">  {{ getAverage(member) | number:'1.1-2' }}</div>
+            <div data-label="Remark">{{ member.remark || '—' }}</div>
+      <!-- <div data-label="Status">
+        <span class="status-pill">
+          {{ member.final_verdict || 'Pending' }}
+        </span>
+      </div> -->
+    </div>
+
+  </div>
+</div>
+
+    <!-- QA LIST -->
+<div class="modal-section" *ngIf="selectedMemberDetails?.qaList?.length">
+
+  <h4 class="section-title">Q&A Evaluation</h4>
+
+  <div class="table-container qa-table-custom">
+
+    <!-- HEADER -->
+    <div class="table-row table-head">
+      <div>Question</div>
+      <div>Answer</div>
+      <div>Expected</div>
+      <div>Members Scores</div>
+
+   
+    </div>
+
+    <!-- DATA -->
+    <div class="table-row" *ngFor="let q of selectedMemberDetails.qaList">
+
+      <div data-label="Question">{{ q.question }}</div>
+      <div data-label="Answer">{{ q.answer }}</div>
+      <div data-label="Expected">{{ q.expectedAnswer }}</div>
+
+      <div class="members-score" data-label="Scores">
+        <div *ngFor="let m of q.members" class="score-chip">
+          {{ m.name }} : {{ m.score }}
+        </div>
+      </div>
+
+
+    </div>
+
+  </div>
+</div>
+
+  </div>
+</div>
+
+    </div>
+
+
+  </div>
+</main>
+
+<!-- VIDEO MODAL -->
+<div *ngIf="isVideoModalOpen" class="video-modal-overlay" (click)="closeVideoModal()">
+  <div class="video-modal-content" (click)="$event.stopPropagation()">
+    <div class="video-modal-header">
+      <div class="video-modal-title">Interview Recording - {{ selectedCandidate.name }}</div>
+      <button class="video-modal-close" (click)="closeVideoModal()" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path d="M18 6L6 18M6 6l12 12" stroke-width="2" stroke-linecap="round" />
+        </svg>
+      </button>
+    </div>
+    <video #videoPlayer class="video-modal-player" controls autoplay *ngIf="safeVideoUrl" [src]="safeVideoUrl">
+      Your browser does not support the video tag.
+    </video>
+  </div>
+</div>

@@ -1,0 +1,255 @@
+<div class="jd-creation-container">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div>
+      <h2>Create Job Description</h2>
+      <p>
+        Upload a job description PDF and review the keywords extracted from it.
+      </p>
+    </div>
+  </div>
+
+  <!-- JD Form -->
+  <div class="jd-card">
+
+    <!-- JD Title -->
+    <div class="form-group">
+      <label for="jdTitle">
+        JD Title <span class="required">*</span>
+      </label>
+
+      <input
+        id="jdTitle"
+        type="text"
+        [(ngModel)]="jdTitle"
+        placeholder="Enter JD title"
+        class="form-control"
+      />
+    </div>
+
+
+    <!-- PDF Upload -->
+    <div class="form-group">
+      <label>
+        Upload JD <span class="required">*</span>
+      </label>
+
+      <div
+        class="upload-area"
+        [class.has-file]="selectedFile"
+        (click)="fileInput.click()"
+      >
+
+        <input
+          #fileInput
+          type="file"
+          accept=".pdf,application/pdf"
+          hidden
+          (change)="onFileSelected($event)"
+        />
+
+        <div *ngIf="!selectedFile" class="upload-content">
+
+          <div class="upload-icon">
+            <i class="bi bi-cloud-arrow-up"></i>
+          </div>
+
+          <h4>Upload JD PDF</h4>
+
+          <p>
+            Click here to select a PDF file
+          </p>
+
+          <span>
+            Only PDF files are allowed
+          </span>
+
+        </div>
+
+
+        <!-- Selected File -->
+        <div
+          *ngIf="selectedFile"
+          class="selected-file"
+          (click)="$event.stopPropagation()"
+        >
+
+          <div class="file-icon">
+            <i class="bi bi-file-earmark-pdf"></i>
+          </div>
+
+          <div class="file-details">
+            <strong>{{ selectedFile.name }}</strong>
+
+            <span>
+              {{ (selectedFile.size / 1024 / 1024).toFixed(2) }} MB
+            </span>
+          </div>
+
+          <button
+            type="button"
+            class="remove-file-btn"
+            (click)="removeFile()"
+          >
+            <i class="bi bi-x-lg"></i>
+          </button>
+
+        </div>
+
+      </div>
+    </div>
+
+
+    <!-- Extract Keywords -->
+    <div class="action-section">
+
+      <button
+        type="button"
+        class="btn btn-primary"
+        [disabled]="!selectedFile || extractingKeywords"
+        (click)="extractKeywords()"
+      >
+
+        <span
+          *ngIf="extractingKeywords"
+          class="spinner-border spinner-border-sm"
+        ></span>
+
+        <span *ngIf="!extractingKeywords">
+          <i class="bi bi-stars"></i>
+          Extract Keywords
+        </span>
+
+        <span *ngIf="extractingKeywords">
+          Extracting Keywords...
+        </span>
+
+      </button>
+
+    </div>
+
+
+    <!-- Keywords Section -->
+    <div
+      class="keywords-section"
+      *ngIf="keywords.length > 0 || keywordsExtracted"
+    >
+
+      <div class="section-header">
+
+        <div>
+          <h3>JD Keywords</h3>
+
+          <p>
+            Review the extracted keywords and add or remove them as required.
+          </p>
+        </div>
+
+        <span class="keyword-count">
+          {{ keywords.length }} Keywords
+        </span>
+
+      </div>
+
+
+      <!-- Keywords -->
+      <div class="keywords-container">
+
+        <div
+          class="keyword-chip"
+          *ngFor="let keyword of keywords; let i = index"
+        >
+
+          <span>{{ keyword }}</span>
+
+          <button
+            type="button"
+            (click)="removeKeyword(i)"
+            aria-label="Remove keyword"
+          >
+            <i class="bi bi-x"></i>
+          </button>
+
+        </div>
+
+        <div
+          class="no-keywords"
+          *ngIf="keywords.length === 0"
+        >
+          No keywords available. Add keywords manually below.
+        </div>
+
+      </div>
+
+
+      <!-- Add Keyword -->
+      <div class="add-keyword-section">
+
+        <input
+          type="text"
+          [(ngModel)]="newKeyword"
+          placeholder="Enter a keyword"
+          class="form-control"
+          (keyup.enter)="addKeyword()"
+        />
+
+        <button
+          type="button"
+          class="btn btn-secondary"
+          [disabled]="!newKeyword.trim()"
+          (click)="addKeyword()"
+        >
+          <i class="bi bi-plus-lg"></i>
+          Add Keyword
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <!-- Save Section -->
+    <div class="form-footer">
+
+      <button
+        type="button"
+        class="btn btn-outline-secondary"
+        (click)="resetForm()"
+      >
+        Cancel
+      </button>
+
+      <button
+        type="button"
+        class="btn btn-success"
+        [disabled]="
+          !jdTitle.trim() ||
+          !selectedFile ||
+          keywords.length === 0 ||
+          saving
+        "
+        (click)="saveJD()"
+      >
+
+        <span
+          *ngIf="saving"
+          class="spinner-border spinner-border-sm"
+        ></span>
+
+        <span *ngIf="!saving">
+          <i class="bi bi-check-lg"></i>
+          Save JD
+        </span>
+
+        <span *ngIf="saving">
+          Saving...
+        </span>
+
+      </button>
+
+    </div>
+
+  </div>
+
+</div>

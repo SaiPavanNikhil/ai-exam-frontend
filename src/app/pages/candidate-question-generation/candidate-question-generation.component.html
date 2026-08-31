@@ -1,0 +1,615 @@
+<!-- =========================================================
+     MAIN PAGE
+     ========================================================= -->
+
+<div class="page-container">
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+
+    <div class="page-title-section">
+
+      <h1>
+        Generate Candidate Questions
+      </h1>
+
+      <p>
+        Create personalized AI interview questions based on
+        a candidate's resume.
+      </p>
+
+    </div>
+
+
+    
+
+  </div>
+
+
+  <!-- =======================================================
+       AI INFORMATION
+       ======================================================= -->
+
+  <div class="info-card">
+
+    <div class="info-card-icon">
+      ✨
+    </div>
+
+    <div class="info-card-content">
+
+      <h3>
+        AI-Powered Interview Generation
+      </h3>
+
+      <p>
+        Select an existing candidate and upload their resume.
+        Gemini will analyze the candidate's skills, experience,
+        projects and education to generate personalized
+        interview questions.
+      </p>
+
+    </div>
+
+  </div>
+
+
+  <!-- =======================================================
+       CANDIDATES
+       ======================================================= -->
+
+  <div class="candidate-card">
+
+    <div class="candidate-card-header">
+
+      <div>
+
+        <h2>
+          Available Candidates
+        </h2>
+
+        <p>
+          Select a candidate to create an AI-powered interview.
+        </p>
+
+      </div>
+
+
+      <div class="candidate-count">
+        {{ candidates.length }}
+      </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         NO CANDIDATES
+         ===================================================== -->
+
+    <div
+      class="empty-state"
+      *ngIf="candidates.length === 0">
+
+      <div class="empty-icon">
+        👥
+      </div>
+
+      <h3>
+        No candidates found
+      </h3>
+
+      <p>
+        No candidates are currently available.
+      </p>
+
+    </div>
+
+
+    <!-- =====================================================
+         CANDIDATE LIST
+         ===================================================== -->
+
+    <div
+      class="candidate-list"
+      *ngIf="candidates.length > 0">
+
+      <div
+        class="candidate-row"
+        *ngFor="let candidate of candidates">
+
+        <!-- AVATAR -->
+
+        <div class="candidate-avatar">
+
+          {{ candidate.name.charAt(0).toUpperCase() }}
+
+        </div>
+
+
+        <!-- DETAILS -->
+
+        <div class="candidate-row-info">
+
+          <strong>
+            {{ candidate.name }}
+          </strong>
+
+          <span>
+            {{ candidate.email || 'No email' }}
+          </span>
+
+        </div>
+
+
+        <!-- COURSE -->
+
+        <div class="candidate-course">
+
+          {{ candidate.course_program || 'N/A' }}
+
+        </div>
+
+
+        <!-- ACTION -->
+
+        <button
+            type="button"
+            class="candidate-action-btn"
+            (click)="openAiInterviewModal(candidate)">
+
+            Generate
+
+            </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- =========================================================
+     AI INTERVIEW MODAL
+     ========================================================= -->
+
+<div
+  class="modal-backdrop"
+  *ngIf="showAiInterviewModal">
+
+
+  <div class="ai-interview-modal">
+
+
+    <!-- =====================================================
+         HEADER
+         ===================================================== -->
+
+    <div class="modal-header">
+
+      <div>
+
+        <h2>
+          Create AI Interview
+        </h2>
+
+        <p>
+          Select a candidate and upload their resume
+        </p>
+
+      </div>
+
+
+      <button
+        type="button"
+        class="close-btn"
+        (click)="closeAiInterviewModal()">
+
+        ✕
+
+      </button>
+
+    </div>
+
+
+    <!-- =====================================================
+         BODY
+         ===================================================== -->
+
+    <div class="modal-body">
+
+
+      <!-- ===================================================
+           CANDIDATE
+           =================================================== -->
+
+     <div
+  class="candidate-details"
+  *ngIf="selectedCandidate">
+
+  <div class="candidate-details-header">
+
+    <span class="candidate-icon">
+      👤
+    </span>
+
+    <strong>
+      Selected Candidate
+    </strong>
+
+  </div>
+
+
+  <div class="candidate-info">
+
+    <div class="info-item">
+
+      <span class="label">
+        Name
+      </span>
+
+      <span class="value">
+        {{ selectedCandidate.name }}
+      </span>
+
+    </div>
+
+
+    <div class="info-item">
+
+      <span class="label">
+        Email
+      </span>
+
+      <span class="value">
+        {{ selectedCandidate.email || 'N/A' }}
+      </span>
+
+    </div>
+
+
+    <div class="info-item">
+
+      <span class="label">
+        Phone
+      </span>
+
+      <span class="value">
+        {{ selectedCandidate.phone || 'N/A' }}
+      </span>
+
+    </div>
+
+
+    <div
+      class="info-item"
+      *ngIf="selectedCandidate.department_branch">
+
+      <span class="label">
+        Department
+      </span>
+
+      <span class="value">
+        {{ selectedCandidate.department_branch }}
+      </span>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+      <!-- ===================================================
+           SELECTED CANDIDATE
+           =================================================== -->
+
+      <div
+        class="candidate-details"
+        *ngIf="selectedCandidateId !== null">
+
+
+        <div class="candidate-details-header">
+
+          <span class="candidate-icon">
+            👤
+          </span>
+
+          <strong>
+            Selected Candidate
+          </strong>
+
+        </div>
+
+
+        <div
+          class="candidate-info"
+          *ngFor="let candidate of candidates">
+
+
+          <ng-container
+            *ngIf="candidate.id === selectedCandidateId">
+
+
+            <div class="info-item">
+
+              <span class="label">
+                Name
+              </span>
+
+              <span class="value">
+                {{ candidate.name }}
+              </span>
+
+            </div>
+
+
+            <div class="info-item">
+
+              <span class="label">
+                Email
+              </span>
+
+              <span class="value">
+                {{ candidate.email || 'N/A' }}
+              </span>
+
+            </div>
+
+
+            <div class="info-item">
+
+              <span class="label">
+                Phone
+              </span>
+
+              <span class="value">
+                {{ candidate.phone || 'N/A' }}
+              </span>
+
+            </div>
+
+
+            <div
+              class="info-item"
+              *ngIf="candidate.department_branch">
+
+              <span class="label">
+                Department
+              </span>
+
+              <span class="value">
+                {{ candidate.department_branch }}
+              </span>
+
+            </div>
+
+
+          </ng-container>
+
+        </div>
+
+      </div>
+
+
+      <!-- ===================================================
+           RESUME UPLOAD
+           =================================================== -->
+
+      <div class="form-group">
+
+        <label>
+
+          Upload Resume
+
+          <span class="required">
+            *
+          </span>
+
+        </label>
+
+
+        <div
+          class="resume-upload-box"
+          [class.has-file]="resumeFile">
+
+
+          <input
+            type="file"
+            id="resumeUpload"
+            accept=".pdf,.doc,.docx"
+            (change)="onResumeSelected($event)"
+            hidden>
+
+
+          <label
+            for="resumeUpload"
+            class="upload-label">
+
+
+            <div class="upload-icon">
+              📄
+            </div>
+
+
+            <div class="upload-text">
+
+
+              <strong *ngIf="!resumeFile">
+
+                Click to upload resume
+
+              </strong>
+
+
+              <strong *ngIf="resumeFile">
+
+                {{ resumeFile.name }}
+
+              </strong>
+
+
+              <span>
+
+                PDF, DOC or DOCX
+
+              </span>
+
+
+            </div>
+
+
+          </label>
+
+        </div>
+
+
+        <small class="form-hint">
+
+          Gemini will analyze this resume and generate
+          candidate-specific interview questions.
+
+        </small>
+
+      </div>
+
+
+      <!-- ===================================================
+           AI INFORMATION
+           =================================================== -->
+
+      <div class="ai-info-box">
+
+
+        <div class="ai-info-icon">
+          ✨
+        </div>
+
+
+        <div class="ai-info-content">
+
+          <strong>
+            AI Question Generation
+          </strong>
+
+
+          <p>
+
+            After uploading the resume, Gemini will analyze
+            the candidate's skills, experience, projects and
+            education to generate personalized interview
+            questions.
+
+          </p>
+
+        </div>
+
+
+      </div>
+
+
+      <!-- ===================================================
+           ERROR
+           =================================================== -->
+
+      <div
+        class="validation-message"
+        *ngIf="errorMessage">
+
+        {{ errorMessage }}
+
+      </div>
+
+
+      <!-- ===================================================
+           SUCCESS
+           =================================================== -->
+
+      <div
+        class="success-message"
+        *ngIf="successMessage">
+
+        {{ successMessage }}
+
+      </div>
+
+
+      <!-- ===================================================
+           LOADING
+           =================================================== -->
+
+      <div
+        class="generating-message"
+        *ngIf="loading">
+
+
+        <div class="spinner"></div>
+
+
+        <span>
+
+          Gemini is analyzing the resume and
+          generating questions...
+
+        </span>
+
+
+      </div>
+
+
+    </div>
+
+
+    <!-- =====================================================
+         FOOTER
+         ===================================================== -->
+
+    <div class="modal-footer">
+
+
+      <button
+        type="button"
+        class="cancel-btn"
+        (click)="closeAiInterviewModal()"
+        [disabled]="loading">
+
+        Cancel
+
+      </button>
+
+
+      <button
+        type="button"
+        class="generate-btn"
+        (click)="generateQuestions()"
+        [disabled]="
+          loading ||
+          selectedCandidateId === null ||
+          !resumeFile
+        ">
+
+
+        <span *ngIf="!loading">
+
+          ✨ Generate Questions
+
+        </span>
+
+
+        <span *ngIf="loading">
+
+          Generating...
+
+        </span>
+
+
+      </button>
+
+
+    </div>
+
+
+  </div>
+
+</div>
