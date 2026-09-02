@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, NgClass, NgFor, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
@@ -265,7 +265,8 @@ export class CommitteeDashboardComponent implements OnInit {
   constructor(private sanitizer: DomSanitizer, private interviewService: InterviewService
     , private dashboardService: DashboardService
     , private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) { }
 
 
@@ -292,7 +293,7 @@ export class CommitteeDashboardComponent implements OnInit {
 
  viewDetails(item: any, index: number) {
 
-  // ✅ Toggle close
+  // Toggle close
   if (this.selectedRowIndex === index) {
     this.selectedRowIndex = null;
     this.selectedInterview = null;
@@ -300,47 +301,59 @@ export class CommitteeDashboardComponent implements OnInit {
     return;
   }
 
-  // ✅ Open row
+  // Open row
   this.selectedRowIndex = index;
   this.selectedInterview = item;
 
   console.log("👉 Candidate ID:", item.candidate_id);
+  console.log("👉 Interview ID:", item.interview_id);
+  console.log("👉 User ID:", this.userId);
 
-  // ✅ Reset flag
+  // Initially allow editing
   this.isEvaluated = false;
 
-  // =========================
-  // ✅ CALL REMARK API
-  // =========================
+  // Check whether THIS USER has already evaluated THIS candidate
   this.dashboardService
-    .getFinalVerdict(item.candidate_id, this.userId) // API name same, response changed
+    .getFinalVerdict(item.candidate_id, this.userId)
     .subscribe({
       next: (res: any) => {
 
-        console.log("👉 API RESPONSE:", res);
+        console.log("👉 FINAL EVALUATION RESPONSE:", res);
 
         const remarkArr = res?.remark;
 
-        // ✅ CHECK REMARK
-        if (!remarkArr || remarkArr.length === 0) {
-          this.isEvaluated = false;
+        // Existing evaluation found
+        if (
+          Array.isArray(remarkArr) &&
+          remarkArr.length > 0 &&
+          remarkArr[0] &&
+          remarkArr[0].trim() !== ''
+        ) {
+          this.isEvaluated = true;
         } else {
-          const remark = remarkArr[0]?.trim();
-
-          this.isEvaluated = remark && remark !== '';
+          this.isEvaluated = false;
         }
 
-        console.log("👉 FINAL FLAG:", this.isEvaluated);
+        console.log(
+          "🔒 SUBMIT DISABLED:",
+          this.isEvaluated
+        );
       },
 
       error: (err) => {
-        console.error("❌ API ERROR:", err);
+
+        console.error(
+          "❌ FINAL EVALUATION API ERROR:",
+          err
+        );
+
+        // If no evaluation exists / API returns error,
+        // allow evaluation
         this.isEvaluated = false;
       }
     });
 
-  // ✅ Existing API
-  // this.loadMemberOfInterviews(item.candidate_id);
+  // Load candidates for selected interview
   this.loadInterviewCandidates(item.interview_id);
 }
   // Get Login User Data
@@ -416,32 +429,128 @@ export class CommitteeDashboardComponent implements OnInit {
 
 
   viewMemberDetails(member: any) {
-    console.log("Clicked 👉", member);
+  console.log("Clicked 👉", member);
 
-    forkJoin({
-      qa: this.dashboardService.getPanelQuestionScores(member.panel_id),
-      //final: this.dashboardService.getFinalMark(member.candidate_id, member.memberid)
-      final: this.dashboardService.getPanelEvaluationFinalMark(member.panel_id)
-
-    }).subscribe({
-      next: (res: any) => {
-
-        console.log("QA RESPONSE 👉", res.qa);
-        console.log("FINAL RESPONSE 👉", res.final);
-
-        // ✅ NO FILTERING → USE FULL RESPONSE
-        this.selectedMemberDetails = {
-          qaList: res.qa,   // ✅ keep members array
-          final: res.final
-        };
-        this.members = res.final; // ✅ key line
-        console.log("FINAL UI DATA 👉", this.selectedMemberDetails);
-
-        this.isMemberModalOpen = true;
-      },
-      error: (err) => console.error("ERROR 👉", err)
-    });
+  if (!this.selectedInterview?.interview_id) {
+    console.error("❌ No interview selected");
+    return;
   }
+
+  const panelId = member.panel_id;
+  const interviewId = this.selectedInterview.interview_id;
+
+  console.log("👉 Panel ID:", panelId);
+  console.log("👉 Interview ID:", interviewId);
+
+  // Reset before fetching
+  this.isEvaluated = false;
+
+  forkJoin({
+    qa: this.dashboardService.getPanelQuestionScores(
+      panelId,
+      interviewId
+    ),
+
+    final: this.dashboardService.getPanelEvaluationFinalMark(
+      panelId,
+      interviewId
+    )
+  }).subscribe({
+    next: (res: any) => {
+
+      console.log("QA RESPONSE 👉", res.qa);
+      console.log("FINAL RESPONSE 👉", res.final);
+
+      // Store the complete response
+      this.selectedMemberDetails = {
+        qaList: res.qa,
+        final: res.final
+      };
+
+      this.members = res.final;
+
+      console.log(
+        "FINAL UI DATA 👉",
+        this.selectedMemberDetails
+      );
+
+      // =====================================================
+      // CHECK WHETHER FINAL EVALUATION ALREADY EXISTS
+      // =====================================================
+
+      const finalData = res.final;
+
+      if (
+        finalData &&
+        Array.isArray(finalData) &&
+        finalData.length > 0
+      ) {
+
+        // Check if at least one actual evaluation exists
+        const existingEvaluation = finalData.some((item: any) => {
+
+          return (
+            item.technical_knowledge !== null &&
+            item.technical_knowledge !== undefined &&
+            Number(item.technical_knowledge) > 0
+          ) ||
+            (
+              item.problem_solving !== null &&
+              item.problem_solving !== undefined &&
+              Number(item.problem_solving) > 0
+            ) ||
+            (
+              item.communication !== null &&
+              item.communication !== undefined &&
+              Number(item.communication) > 0
+            ) ||
+            (
+              item.domain_aptitude !== null &&
+              item.domain_aptitude !== undefined &&
+              Number(item.domain_aptitude) > 0
+            ) ||
+            (
+              item.overall_impression !== null &&
+              item.overall_impression !== undefined &&
+              Number(item.overall_impression) > 0
+            ) ||
+            (
+              item.remark &&
+              item.remark.trim() !== ''
+            ) ||
+            (
+              item.final_verdict &&
+              item.final_verdict !== 'Pending'
+            );
+        });
+
+        this.isEvaluated = existingEvaluation;
+
+      } else {
+        // No final evaluation data
+        this.isEvaluated = false;
+      }
+
+      console.log(
+        "🔒 Submit Button Disabled:",
+        this.isEvaluated
+      );
+
+      this.isMemberModalOpen = true;
+    },
+
+    error: (err) => {
+
+      console.error(
+        "❌ PANEL EVALUATION ERROR 👉",
+        err
+      );
+
+      // If API fails, don't mark it as evaluated
+      this.isEvaluated = false;
+    }
+  });
+}
 
   closeMemberModal() {
     this.isMemberModalOpen = false;
@@ -453,98 +562,270 @@ export class CommitteeDashboardComponent implements OnInit {
   }
 
   selectCandidate(candidate: any, index: number) {
-    this.selectedIndex = index;
 
-    const candidateId = candidate.candidate_id;
-    // ✅ Loading state
-    this.panelMembers = null;
-    // Call BOTH APIs
-    forkJoin({
-      candidate: this.dashboardService.getCandidate(candidateId),
-      qa: this.dashboardService.getQA(candidateId, this.userId,this.selectedInterview.interview_id),
-      panel: this.dashboardService.getPanelMembers(candidate.panel_id,this.selectedInterview.interview_id),
-      emotion: this.dashboardService.getVideoAnalysis(this.selectedInterview.interview_id,candidateId),
-      // ✅ NEW API
-      finalMark: this.dashboardService.getFinalMark(candidateId, this.userId)
+  this.selectedIndex = index;
 
-    }).subscribe({
-      next: (res: any) => {
+  const candidateId = candidate.candidate_id;
 
-        // Candidate data
-        this.selectedCandidate = res.candidate;
+  // Initially assume this candidate has NOT been evaluated
+  // =====================================================
+// CLEAR PREVIOUS CANDIDATE DATA IMMEDIATELY
+// =====================================================
 
-        // Add QA LIST into same object
-        this.selectedCandidate.qaList = res.qa.qaList || [];
-        console.log('Q&A Evaluation Log 👉', this.selectedCandidate.qaList);
-        // Clean skills
-        if (this.selectedCandidate.skills) {
-          this.selectedCandidate.skills =
-            this.selectedCandidate.skills.map((s: string) => s.trim());
+this.isEvaluated = false;
+
+this.selectedCandidate = null;
+this.panelMembers = null;
+this.questionScores = [];
+
+this.selectedMemberDetails = null;
+
+// Reset evaluation fields
+this.resetFinalMarks();
+
+// Force Angular to remove previous candidate from UI
+this.cdr.detectChanges();
+
+console.log(
+  "🔄 Previous candidate cleared. Loading candidate:",
+  candidateId
+);
+
+  forkJoin({
+
+    candidate: this.dashboardService.getCandidate(candidateId),
+
+    qa: this.dashboardService.getQA(
+      candidateId,
+      this.userId,
+      this.selectedInterview.interview_id
+    ),
+
+    panel: this.dashboardService.getPanelMembers(
+      candidate.panel_id,
+      this.selectedInterview.interview_id,
+      candidateId
+    ),
+
+    emotion: this.dashboardService.getVideoAnalysis(
+      this.selectedInterview.interview_id,
+      candidateId
+    ),
+
+    // Existing final evaluation
+    finalMark: this.dashboardService.getFinalMark(
+      candidateId,
+      this.userId,
+      this.selectedInterview.interview_id
+    ),
+
+    questionScores: this.dashboardService.getPanelQuestionScores(
+      candidate.panel_id,
+      this.selectedInterview.interview_id
+    )
+
+  }).subscribe({
+
+    next: (res: any) => {
+
+      console.log("=================================");
+      console.log("FINAL MARK API RESPONSE 👉", res.finalMark);
+      console.log("=================================");
+
+      // Candidate data
+      this.selectedCandidate = res.candidate;
+
+      // QA list
+      this.selectedCandidate.qaList =
+        res.qa?.qaList || [];
+
+      console.log(
+        'Q&A Evaluation Log 👉',
+        this.selectedCandidate.qaList
+      );
+
+      // AI Question Scores
+      this.questionScores =
+        res.questionScores || [];
+
+      console.log(
+        '🤖 AI Question Scores 👉',
+        this.questionScores
+      );
+
+      // Technical Knowledge AI Score
+      const technicalKnowledge =
+        this.calculateTechnicalKnowledgeForMember(
+          this.user?.name
+        );
+
+      console.log(
+        '🧠 Technical Knowledge AI Score:',
+        technicalKnowledge
+      );
+
+      this.criteria[0].score =
+        technicalKnowledge;
+
+      // Clean skills
+      if (this.selectedCandidate.skills) {
+        this.selectedCandidate.skills =
+          this.selectedCandidate.skills.map(
+            (s: string) => s.trim()
+          );
+      }
+
+      // Panel members
+      this.panelMembers = res.panel;
+
+      console.log(
+        'PANEL 👉',
+        this.panelMembers
+      );
+
+      // =====================================================
+      // CHECK EXISTING FINAL EVALUATION
+      // =====================================================
+
+      if (
+        res.finalMark &&
+        !res.finalMark.message
+      ) {
+
+        console.log(
+          "✅ EXISTING FINAL EVALUATION FOUND"
+        );
+
+        // Load existing values
+        this.setFinalMarks(res.finalMark);
+
+        // IMPORTANT:
+        // Existing evaluation means button must be disabled
+        this.isEvaluated = true;
+
+      } else {
+
+        console.log(
+          "🆕 NO FINAL EVALUATION FOUND"
+        );
+
+        this.resetFinalMarks();
+
+        // Allow new evaluation
+        this.isEvaluated = false;
+      }
+
+      console.log(
+        "🔒 isEvaluated =",
+        this.isEvaluated
+      );
+
+      this.cdr.detectChanges();
+
+      // =====================================================
+      // Calculate facial analysis scores
+      // =====================================================
+
+      if (res.emotion) {
+
+        console.log(
+          "🎭 Raw Emotion:",
+          res.emotion
+        );
+
+        const face =
+          this.calculateScores(res.emotion);
+
+        console.log(
+          "🎭 Calculated Emotion:",
+          face
+        );
+
+        // IMPORTANT:
+        // Only overwrite these scores if there is NO
+        // existing final evaluation.
+        if (!this.isEvaluated) {
+
+          this.criteria[1].score =
+            Math.round(face.confidence / 10);
+
+          this.criteria[2].score =
+            Math.round(face.communication / 10);
+
+          this.criteria[3].score =
+            Math.round(face.overall_score / 10);
         }
+      }
 
-        this.panelMembers = res.panel;
+      console.log(
+        "🔒 FINAL BUTTON STATE:",
+        this.isEvaluated
+      );
 
-        console.log('PANEL 👉', this.panelMembers);
+      console.log(
+        'FINAL DATA 👉',
+        this.selectedCandidate
+      );
+    },
 
-        // ✅ SET FINAL MARKS HERE
-        if (res.finalMark && !res.finalMark.message) {
-          this.setFinalMarks(res.finalMark);
-        } else {
-          this.resetFinalMarks(); // if no data
-        }
+    error: (err) => {
 
-        // ✅ Calculate AI scores from facial analysis
-        if (res.emotion) {
+      console.error(
+        "❌ Candidate loading error:",
+        err
+      );
 
-          console.log("🎭 Raw Emotion:", res.emotion);
+      this.isEvaluated = false;
+    }
 
-          const face = this.calculateScores(res.emotion);
+  });
+}
 
-          console.log("🎭 Calculated Emotion:", face);
+  setFinalMarks(data: any) {
 
-          this.criteria[1].score = Math.round(face.confidence / 10);
-
-          this.criteria[2].score = Math.round(face.communication / 10);
-
-          this.criteria[3].score = Math.round(face.overall_score / 10);
-
-        }
-        console.log('FINAL DATA 👉', this.selectedCandidate);
-      },
-      error: (err) => console.error(err)
-    });
-  }
-
- setFinalMarks(data: any) {
+    console.log("📥 Setting existing final marks:", data);
 
     this.criteria = [
 
       {
         name: 'Technical Knowledge',
-        score: data.technical_knowledge || 0
+        score: Number(data.technical_knowledge ?? 0)
       },
 
       {
         name: 'Confidence',
-        score: 0
+        score: Number(data.problem_solving ?? 0)
       },
 
       {
         name: 'Communication',
-        score: 0
+        score: Number(data.communication ?? 0)
       },
 
       {
         name: 'Overall Impression',
-        score: 0
+        score: Number(data.overall_impression ?? 0)
       }
 
     ];
 
-    this.remarks = data.remark || '';
+    this.remarks = data.remark ?? '';
+    this.verdict = data.final_verdict ?? '';
 
-    this.verdict = data.final_verdict || '';
+    console.log(
+      "📊 Existing Criteria:",
+      this.criteria
+    );
 
+    console.log(
+      "📝 Existing Remarks:",
+      this.remarks
+    );
+
+    console.log(
+      "🏆 Existing Verdict:",
+      this.verdict
+    );
   }
 
   resetFinalMarks() {
@@ -632,49 +913,121 @@ export class CommitteeDashboardComponent implements OnInit {
   //   });
   // }
 
+  questionScores: any[] = [];
 
+  isDataFetched: boolean = false;
+
+  calculateTechnicalKnowledgeForMember(memberName: string): number {
+
+  if (!this.questionScores || this.questionScores.length === 0) {
+    return 0;
+  }
+
+  const scores: number[] = [];
+
+  this.questionScores.forEach((question: any) => {
+
+    if (
+      !question.members ||
+      !Array.isArray(question.members)
+    ) {
+      return;
+    }
+
+    const member = question.members.find(
+      (m: any) => m.name === memberName
+    );
+
+    if (
+      member &&
+      member.score !== null &&
+      member.score !== undefined
+    ) {
+
+      const score = Number(member.score);
+
+      if (!isNaN(score)) {
+        scores.push(score);
+      }
+
+    }
+
+  });
+
+  if (scores.length === 0) {
+    return 0;
+  }
+
+  const total = scores.reduce(
+    (sum, score) => sum + score,
+    0
+  );
+
+  const average = total / scores.length;
+
+  // AI question scores are out of 10.
+  // Technical Knowledge is also out of 10.
+  return Math.round(average);
+}
 
   submit() {
 
-    const payload = {
-      candidateId: this.selectedCandidate.id,
-      memberId: this.userId,
-      remark: this.remarks,
-      verdict: this.verdict,
-
-      qaList: this.selectedCandidate.qaList.map((q: any) => ({
-        question_id: q.question_id,
-        score: q.score || 0
-      })),
-
-      technical_knowledge: this.criteria[0].score,
-      problem_solving: this.criteria[1].score,
-      communication: this.criteria[2].score,
-      domain_aptitude: this.criteria[3].score,
-      overall_impression: this.criteria[4].score
-    };
-
-    console.log('Sending Payload 👉', payload);
-
-    this.dashboardService.saveEvaluation(payload).subscribe({
-      next: (res: any) => {
-        console.log('Saved ✅', res);
-
-        // ✅ SHOW BACKEND MESSAGE
-        alert(res?.message || 'Evaluation submitted successfully!');
-
-        // ✅ Optional: refresh / reset
-        // this.resetForm();
-        window.location.reload();
-
-      },
-      error: (err) => {
-        console.error('Error ❌', err);
-
-        alert(err?.error?.error || 'Failed to submit');
-      }
-    });
+  if (!this.selectedCandidate) {
+    alert('Please select a candidate.');
+    return;
   }
+
+  const payload = {
+    candidateId: this.selectedCandidate.id,
+    memberId: this.userId,
+    remark: this.remarks,
+    verdict: this.verdict,
+    interview_id: this.selectedInterview.interview_id,
+
+    qaList: (this.selectedCandidate.qaList || []).map((q: any) => ({
+      question_id: q.question_id,
+      score: q.score || 0
+    })),
+
+    technical_knowledge: this.criteria[0]?.score || 0,
+    problem_solving: this.criteria[1]?.score || 0,
+    communication: this.criteria[2]?.score || 0,
+    domain_aptitude: this.criteria[3]?.score || 0,
+
+    // You currently DON'T have criteria[4]
+    overall_impression: this.criteria[3]?.score || 0
+  };
+
+  console.log('Sending Payload 👉', payload);
+
+  this.dashboardService.saveEvaluation(payload).subscribe({
+
+    next: (res: any) => {
+
+      console.log('Saved ✅', res);
+
+      alert(
+        res?.message ||
+        'Evaluation submitted successfully!'
+      );
+
+      window.location.reload();
+    },
+
+    error: (err) => {
+
+      console.error('Error ❌', err);
+
+      alert(
+        err?.error?.error ||
+        err?.error?.detail ||
+        'Failed to submit'
+      );
+
+    }
+
+  });
+}
 
   getTagClass(tag: string) {
     tag = tag.toLowerCase();

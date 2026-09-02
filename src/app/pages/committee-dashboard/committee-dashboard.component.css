@@ -725,9 +725,30 @@ h1, h2, h3, h4 { font-family: 'Lexend', 'Inter', sans-serif; letter-spacing: -0.
   transition: transform .15s, box-shadow .15s;
   box-shadow: 0 6px 18px var(--primary-ring);
 }
-.card .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 26px var(--primary-ring); }
-.card .submit-btn:disabled { opacity: .55; cursor: not-allowed; transform: none; box-shadow: none; }
 
+/* Hover only when button is enabled */
+.card .submit-btn:not(:disabled):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 26px var(--primary-ring);
+}
+
+/* Disabled button */
+.card .submit-btn:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+  pointer-events: none;
+}
+
+/* Prevent hover/focus effects on disabled button */
+.card .submit-btn:disabled:hover,
+.card .submit-btn:disabled:focus,
+.card .submit-btn:disabled:active {
+  transform: none !important;
+  box-shadow: none !important;
+  cursor: not-allowed;
+}
 /* ═══════════════════════════════════════════════
    MEMBER EVALUATION MODAL
 ═══════════════════════════════════════════════ */
